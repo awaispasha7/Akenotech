@@ -124,3 +124,4 @@ netlify deploy --prod
 ```
 
 **Your Akeno Tech website is ready to go live!** 🎉
+

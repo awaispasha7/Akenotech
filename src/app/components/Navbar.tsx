@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -12,7 +12,6 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState<boolean>(false);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
-  const router = useRouter();
   const isBlogPage = pathname === '/blog';
 
   const handleNavigation = useCallback((sectionId: string): void => {
@@ -62,14 +61,6 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
           {/* Logo */}
           <Link 
             href="/"
-            onClick={() => {
-              if (!isBlogPage) {
-                // If on home page, scroll to top
-                setTimeout(() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 100);
-              }
-            }}
             className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-200 group"
           >
             <div className="w-12 h-12 mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
