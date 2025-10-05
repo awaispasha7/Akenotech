@@ -57,13 +57,13 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
   return (
     <nav className="bg-gray-900 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <Link 
             href="/"
             className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-200 group"
           >
-            <div className="w-12 h-12 mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="w-10 h-10 md:w-12 md:h-12 mr-2 md:mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Image
                 src="/akeno-tech.png"
                 alt="Akeno Tech Logo"
@@ -73,8 +73,8 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
               />
             </div>
             <div className="group-hover:translate-x-1 transition-transform duration-300">
-              <span className="text-white text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Akeno</span>
-              <span className="text-white text-xl font-light ml-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Tech</span>
+              <span className="text-white text-lg md:text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Akeno</span>
+              <span className="text-white text-lg md:text-xl font-light ml-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Tech</span>
             </div>
           </Link>
 
@@ -159,9 +159,9 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-white hover:text-gray-300 focus:outline-none focus:text-gray-300"
+              className="text-white hover:text-gray-300 focus:outline-none focus:text-gray-300 p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-6 w-6 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -174,8 +174,14 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800 border-t border-gray-700">
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <div className="md:hidden relative z-50">
+              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800 border-t border-gray-700 animate-in slide-in-from-top-2 duration-200">
               <button
                 onClick={() => {
                   handleNavigation('areas-of-expertise');
@@ -242,8 +248,9 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
               >
                 Get a Free Consultation
               </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>

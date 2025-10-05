@@ -8,6 +8,7 @@ const __dirname = dirname(__filename);
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
+  outputFileTracingRoot: __dirname,
   images: {
     unoptimized: true
   }
