@@ -1,12 +1,12 @@
 [build]
   # Directory to change to before starting a build
-  base = "tech"
+  base = "."
   
   # Directory that contains the deploy-ready HTML files and assets
-  publish = "tech/out"
+  publish = "out"
   
   # Default build command
-  command = "cd tech && npm install && npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   # Node.js version
