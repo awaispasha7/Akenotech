@@ -11,5 +11,5 @@ export default function CaseStudies(): React.JSX.Element {
     router.replace('/#highlighted-use-cases');
   }, [router]);
 
-  return null;
+  return <div>Redirecting...</div>;
 }

@@ -11,5 +11,5 @@ export default function Services(): React.JSX.Element {
     router.replace('/#areas-of-expertise');
   }, [router]);
 
-  return null;
+  return <div>Redirecting...</div>;
 }

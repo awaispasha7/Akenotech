@@ -11,5 +11,5 @@ export default function Technologies(): React.JSX.Element {
     router.replace('/#technologies-tools');
   }, [router]);
 
-  return null;
+  return <div>Redirecting...</div>;
 }

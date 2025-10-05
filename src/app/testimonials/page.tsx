@@ -11,5 +11,5 @@ export default function Testimonials(): React.JSX.Element {
     router.replace('/#testimonials');
   }, [router]);
 
-  return null;
+  return <div>Redirecting...</div>;
 }

@@ -11,5 +11,5 @@ export default function Contact(): React.JSX.Element {
     router.replace('/#contact');
   }, [router]);
 
-  return null;
+  return <div>Redirecting...</div>;
 }

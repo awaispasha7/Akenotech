@@ -1,16 +1,16 @@
 [build]
   # Directory to change to before starting a build
-  base = "."
+  base = "tech"
   
   # Directory that contains the deploy-ready HTML files and assets
-  publish = "out"
+  publish = "tech/out"
   
   # Default build command
-  command = "npm run build"
+  command = "cd tech && npm install && npm run build"
 
 [build.environment]
   # Node.js version
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 # Redirect rules for SPA (Single Page Application)
 [[redirects]]
