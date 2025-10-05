@@ -3,7 +3,7 @@
   base = "."
   
   # Directory that contains the deploy-ready HTML files and assets
-  publish = "out"
+  publish = ".next"
   
   # Default build command
   command = "npm install && npm run build"
@@ -12,7 +12,11 @@
   # Node.js version
   NODE_VERSION = "20"
 
-# Redirect rules for SPA (Single Page Application)
+# Functions for serverless functions (if needed)
+[functions]
+  directory = "netlify/functions"
+
+# Redirect rules for Next.js
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -29,7 +33,7 @@
 
 # Cache static assets
 [[headers]]
-  for = "/static/*"
+  for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
