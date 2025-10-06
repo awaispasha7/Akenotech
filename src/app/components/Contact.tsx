@@ -54,9 +54,18 @@ const Contact: React.FC<ContactProps> = (): React.JSX.Element => {
     setIsSubmitting(true);
     
     try {
+      // Clear only specific EmailJS cache if needed
+      if (typeof window !== 'undefined') {
+        // Only clear specific EmailJS cache keys, not all email-related keys
+        const emailjsKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('emailjs_') || key.includes('emailjs_cache')
+        );
+        emailjsKeys.forEach(key => localStorage.removeItem(key));
+      }
+
       // EmailJS configuration
-      const serviceId = 'service_yotvu3d';
-      const templateId = 'template_uujhwhn';
+      const serviceId = 'service_4yz4k76';
+      const templateId = 'template_xhb8548';
       const publicKey = 'Id7n5AZzArVL9Zys_';
 
       const templateParams = {
@@ -68,10 +77,11 @@ const Contact: React.FC<ContactProps> = (): React.JSX.Element => {
 
       console.log('Sending email with:', { serviceId, templateId, templateParams, publicKey });
       
+      // Send email with template parameters
       const result = await emailjs.send(
         serviceId,
         templateId,
-        templateParams,
+        templateParams, // Send without timestamp to avoid template issues
         publicKey
       );
 
@@ -159,10 +169,10 @@ const Contact: React.FC<ContactProps> = (): React.JSX.Element => {
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:animate-ping"></div>
                   </div>
                   <a 
-                    href="mailto:Ask@akenotech.com" 
+                    href="mailto:ask@akenotech.com" 
                     className="text-white text-lg hover:text-purple-300 transition-all duration-300 hover:underline group-hover:translate-x-1"
                   >
-                    Ask@akenotech.com
+                    ask@akenotech.com
                   </a>
                 </div>
 
@@ -321,7 +331,7 @@ const Contact: React.FC<ContactProps> = (): React.JSX.Element => {
                   </button>
 
                   <a 
-                    href="mailto:Ask@akenotech.com" 
+                    href="mailto:ask@akenotech.com" 
                     className="text-gray-400 hover:text-white transition-all duration-300 hover:underline text-sm group-hover:translate-x-1"
                   >
                     Or email us directly
