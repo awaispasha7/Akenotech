@@ -20,7 +20,6 @@ interface HighlightedUseCasesProps {}
 const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.Element => {
   const [isVisible, setIsVisible] = useState(false);
   const [animatedCards, setAnimatedCards] = useState<number[]>([]);
-  const [loadingStates, setLoadingStates] = useState<{[key: number]: boolean}>({});
   const router = useRouter();
 
   const useCases: UseCase[] = useMemo(() => [
@@ -72,6 +71,7 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
       cardTimers.forEach(clearTimeout);
     };
   }, []);
+
 
   return (
     <section id="highlighted-use-cases" className="bg-black py-20 relative overflow-hidden">
@@ -171,37 +171,27 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
                 {/* Case Study Button Section with Background Visible */}
                 <div className="bg-gray-900/60 backdrop-blur-sm p-4 relative z-30">
                   <button 
-                    onClick={async () => {
+                    onClick={() => {
                       console.log('Button clicked! Navigating to case-study...', useCase.companyName);
-                      setLoadingStates(prev => ({ ...prev, [index]: true }));
-                      try {
-                        // Navigate to different case study pages based on company - all open in same tab
-                        if (useCase.companyName === 'BookYolo') {
-                          console.log('Navigating to BookYolo case study');
-                          window.location.href = '/case-study/bookyolo';
-                        } else if (useCase.companyName === 'FieldCall.ai') {
-                          console.log('Navigating to FieldCall.ai case study');
-                          window.location.href = '/case-study/fieldcall-ai';
-                        } else if (useCase.companyName === 'Livekit Voice Agent') {
-                          console.log('Navigating to Livekit Voice Agent case study');
-                          window.location.href = '/case-study/livekit-voice-agent';
-                        } else {
-                          console.log('Default navigation to BookYolo');
-                          window.location.href = '/case-study/bookyolo';
-                        }
-                      } catch (error) {
-                        console.error('Navigation error:', error);
-                        setLoadingStates(prev => ({ ...prev, [index]: false }));
+                      
+                      // Navigate immediately without loading state
+                      if (useCase.companyName === 'BookYolo') {
+                        console.log('Navigating to BookYolo case study');
+                        router.push('/case-study/bookyolo');
+                      } else if (useCase.companyName === 'FieldCall.ai') {
+                        console.log('Navigating to FieldCall.ai case study');
+                        router.push('/case-study/fieldcall-ai');
+                      } else if (useCase.companyName === 'Livekit Voice Agent') {
+                        console.log('Navigating to Livekit Voice Agent case study');
+                        router.push('/case-study/livekit-voice-agent');
+                      } else {
+                        console.log('Default navigation to BookYolo');
+                        router.push('/case-study/bookyolo');
                       }
                     }}
-                    disabled={loadingStates[index]}
-                    className={`w-full font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 shadow-xl text-base border-2 cursor-pointer ${
-                      loadingStates[index] 
-                        ? 'bg-gray-600 text-gray-300 border-gray-500 cursor-not-allowed' 
-                        : 'bg-black hover:bg-gray-800 text-white border-gray-700'
-                    }`}
+                    className="w-full font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 shadow-xl text-base border-2 cursor-pointer bg-black hover:bg-gray-800 text-white border-gray-700"
                   >
-                    <span>{loadingStates[index] ? 'Loading...' : 'Read Case Study'}</span>
+                    <span>Read Case Study</span>
                     <div className="w-5 h-5 relative">
                       {/* Arrow icon made of squares */}
                       <div className="absolute top-0 left-0 w-2 h-2 bg-white"></div>
