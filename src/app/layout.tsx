@@ -17,11 +17,12 @@ export const metadata = {
   description: "Transform your business with custom AI solutions. We build scalable AI systems that automate workflows and deliver actionable insights.",
   icons: {
     icon: [
-      { url: '/final.png', sizes: '32x32', type: 'image/png' },
-      { url: '/final.png', sizes: '16x16', type: 'image/png' },
+      { url: '/final.png?v=2', sizes: '32x32', type: 'image/png' },
+      { url: '/final.png?v=2', sizes: '16x16', type: 'image/png' },
+      { url: '/final.png?v=2', sizes: '48x48', type: 'image/png' },
     ],
-    shortcut: '/final.png',
-    apple: '/final.png',
+    shortcut: '/final.png?v=2',
+    apple: '/final.png?v=2',
   },
 };
 
@@ -33,9 +34,11 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/final.png" type="image/png" />
-        <link rel="shortcut icon" href="/final.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/final.png" />
+        <link rel="icon" href="/final.png?v=2" type="image/png" />
+        <link rel="shortcut icon" href="/final.png?v=2" type="image/png" />
+        <link rel="apple-touch-icon" href="/final.png?v=2" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/final.png?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/final.png?v=2" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
