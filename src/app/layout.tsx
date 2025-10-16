@@ -17,11 +17,11 @@ export const metadata = {
   description: "Transform your business with custom AI solutions. We build scalable AI systems that automate workflows and deliver actionable insights.",
   icons: {
     icon: [
-      { url: '/akeno-tech.png', sizes: '32x32', type: 'image/png' },
-      { url: '/akeno-tech.png', sizes: '16x16', type: 'image/png' },
+      { url: '/final.png', sizes: '32x32', type: 'image/png' },
+      { url: '/final.png', sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: '/akeno-tech.png',
-    apple: '/akeno-tech.png',
+    shortcut: '/final.png',
+    apple: '/final.png',
   },
 };
 
@@ -33,9 +33,9 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/akeno-tech.png" type="image/png" />
-        <link rel="shortcut icon" href="/akeno-tech.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/akeno-tech.png" />
+        <link rel="icon" href="/final.png" type="image/png" />
+        <link rel="shortcut icon" href="/final.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/final.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

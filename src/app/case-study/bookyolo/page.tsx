@@ -241,7 +241,7 @@ export default function CaseStudyPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Image 
-                src="/akeno-tech.png" 
+                src="/final.png" 
                 alt="Akeno Tech Logo" 
                 width={40}
                 height={40}
