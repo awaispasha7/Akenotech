@@ -52,7 +52,7 @@ const Footer: React.FC<FooterProps> = (): React.JSX.Element => {
               <div className="group flex items-center mb-6">
                 <div className="w-12 h-12 mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                   <Image
-                    src="/akeno-tech.png"
+                    src="/final.png"
                     alt="Akeno Tech Logo"
                     width={48}
                     height={48}

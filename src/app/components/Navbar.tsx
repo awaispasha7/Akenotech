@@ -65,7 +65,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
           >
             <div className="w-10 h-10 md:w-12 md:h-12 mr-2 md:mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Image
-                src="/akeno-tech.png"
+                src="/final.png"
                 alt="Akeno Tech Logo"
                 width={48}
                 height={48}
