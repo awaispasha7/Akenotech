@@ -6,7 +6,14 @@ import { useChat } from './ChatProvider';
 
 export default function ConditionalChatButton() {
   const { isChatOpen, setChatOpen } = useChat();
+  const pathname = usePathname();
   
-  // Show chat button on all pages since navbar can open it from anywhere
+  // Hide chatbot on schedule consultation page
+  const showChatButton = pathname !== '/schedule';
+  
+  if (!showChatButton) {
+    return null;
+  }
+  
   return <ChatBotButton isChatOpen={isChatOpen} setChatOpen={setChatOpen} />;
 }
