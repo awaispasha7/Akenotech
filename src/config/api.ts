@@ -1,6 +1,7 @@
 // API Configuration
 // Uses env when provided, otherwise falls back to your local Akeno Tech backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://akenotech-production.up.railway.app';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'web-production-ae7a.up.railway.app';
 
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE_URL}/chat`,
