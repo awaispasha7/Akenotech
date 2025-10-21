@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useChat } from '../../components/ChatProvider';
 
 interface NavbarProps {}
 
@@ -13,6 +14,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const isBlogPage = pathname === '/blog';
+  const { setChatOpen } = useChat();
 
   const handleNavigation = useCallback((sectionId: string): void => {
     if (isBlogPage) {
@@ -29,6 +31,11 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
       }
     }
   }, [isBlogPage]);
+
+  const handleContactClick = useCallback(() => {
+    setChatOpen(true);
+    setIsMenuOpen(false); // Close mobile menu if open
+  }, [setChatOpen]);
 
   const handleDropdownMouseEnter = useCallback(() => {
     if (dropdownTimeout) {
@@ -106,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
                 Testimonials
               </button>
               <button
-                onClick={() => handleNavigation('contact')}
+                onClick={handleContactClick}
                 className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Contact
@@ -148,7 +155,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
           {/* CTA Button */}
           <div className="hidden md:block">
             <button
-              onClick={() => handleNavigation('contact')}
+              onClick={handleContactClick}
               className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-gray-600"
             >
               Get a Free Consultation
@@ -219,10 +226,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
                 Testimonials
               </button>
               <button
-                onClick={() => {
-                  handleNavigation('contact');
-                  setIsMenuOpen(false);
-                }}
+                onClick={handleContactClick}
                 className="text-white hover:text-gray-300 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
               >
                 Contact
@@ -240,10 +244,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
                 </Link>
               </div>
               <button
-                onClick={() => {
-                  handleNavigation('contact');
-                  setIsMenuOpen(false);
-                }}
+                onClick={handleContactClick}
                 className="w-full text-left bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-base font-medium mt-4 border border-gray-600"
               >
                 Get a Free Consultation

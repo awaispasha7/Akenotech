@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+import ChatProvider from "@/components/ChatProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +26,6 @@ export const metadata = {
     apple: '/final.png?v=2',
   },
 };
-
 interface RootLayoutProps {
   children: ReactNode;
 }
@@ -44,7 +44,9 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        {children}
+        <ChatProvider>
+          {children}
+        </ChatProvider>
       </body>
     </html>
   );
