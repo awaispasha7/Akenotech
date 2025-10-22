@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -24,30 +24,43 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
   // Typing effect function
   const typeMessage = useCallback((messageId: string, fullText: string, speed: number = 30) => {
     let currentIndex = 0;
-    const messageElement = document.getElementById(`message-${messageId}`);
+    let typeInterval: NodeJS.Timeout | null = null;
     
-    if (!messageElement) {
-      console.warn(`Message element with id 'message-${messageId}' not found`);
-      return;
-    }
-
-    const typeInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        const partialText = fullText.substring(0, currentIndex);
-        const formattedText = partialText
-          .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>');
-        messageElement.innerHTML = formattedText;
-        currentIndex++;
-        scrollToBottom();
-      } else {
-        clearInterval(typeInterval);
-        // Mark message as no longer typing
+    const startTyping = () => {
+      const messageElement = document.getElementById(`message-${messageId}`);
+      
+      if (!messageElement) {
+        console.warn(`Message element with id 'message-${messageId}' not found`);
+        // Mark message as no longer typing if element not found
         setMessages(prev => prev.map(msg => 
           msg.id === messageId ? { ...msg, isTyping: false } : msg
         ));
+        return;
       }
-    }, speed);
+
+      typeInterval = setInterval(() => {
+        if (currentIndex <= fullText.length) {
+          const partialText = fullText.substring(0, currentIndex);
+          const formattedText = partialText
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>');
+          messageElement.innerHTML = formattedText;
+          currentIndex++;
+          scrollToBottom();
+        } else {
+          if (typeInterval) {
+            clearInterval(typeInterval);
+            typeInterval = null;
+          }
+          // Mark message as no longer typing
+          setMessages(prev => prev.map(msg => 
+            msg.id === messageId ? { ...msg, isTyping: false } : msg
+          ));
+        }
+      }, speed);
+    };
+
+    startTyping();
   }, []);
 
   useEffect(() => {
@@ -78,20 +91,28 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
       };
 
       setMessages([welcomeMessage]);
-      
-      // Start typing effect after a short delay
-      setTimeout(() => {
-        typeMessage(welcomeMessage.id, welcomeText, 15);
-      }, 1000);
-
-      // Fallback: if typing effect doesn't work, show full message after 5 seconds
-      setTimeout(() => {
-        setMessages(prev => prev.map(msg => 
-          msg.id === welcomeMessage.id && msg.isTyping ? { ...msg, isTyping: false } : msg
-        ));
-      }, 5000);
     }
   }, [isOpen, messages.length]);
+
+  // Start typing effect after message is rendered
+  useLayoutEffect(() => {
+    if (messages.length === 1 && messages[0].isTyping) {
+      const message = messages[0];
+      // Wait for DOM to be ready, then start typing
+      const startTyping = () => {
+        const messageElement = document.getElementById(`message-${message.id}`);
+        if (messageElement) {
+          typeMessage(message.id, message.content, 20);
+        } else {
+          // Retry after a short delay if element not found
+          setTimeout(startTyping, 100);
+        }
+      };
+      
+      // Start typing after a short delay to ensure DOM is ready
+      setTimeout(startTyping, 500);
+    }
+  }, [messages, typeMessage]);
 
 
   const handleSendMessage = async () => {
