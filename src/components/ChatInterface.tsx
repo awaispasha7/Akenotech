@@ -239,13 +239,15 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
                           : 'bg-[#1a1a1a]/90 text-white border border-[#2a2a2a]/50 backdrop-blur-sm'
                       }`}
                     >
-                      {message.type === 'assistant' && message.isTyping && typingMessageId === message.id ? (
+                      {message.type === 'assistant' && message.isTyping ? (
                         <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-line">
                           <span 
                             dangerouslySetInnerHTML={{
-                              __html: typingText
-                                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
-                                .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>')
+                              __html: typingMessageId === message.id ? 
+                                typingText
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
+                                  .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>') 
+                                : ''
                             }}
                           />
                         </div>
