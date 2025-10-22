@@ -170,6 +170,7 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
   };
 
   const handleScheduleClick = () => {
+    onClose(); // Close the chatbot first
     router.push('/schedule');
   };
 
