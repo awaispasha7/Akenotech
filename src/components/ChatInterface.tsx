@@ -14,6 +14,7 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Array<{id: string, type: 'user' | 'assistant', content: string, isTyping?: boolean}>>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isWelcomeTyping, setIsWelcomeTyping] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -25,9 +26,14 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
   const [typingText, setTypingText] = useState('');
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
 
-  const startTypingEffect = (messageId: string, fullText: string, speed: number = 25) => {
+  const startTypingEffect = (messageId: string, fullText: string, speed: number = 25, isWelcome: boolean = false) => {
     setTypingMessageId(messageId);
     setTypingText('');
+    
+    // Set welcome typing state if this is the welcome message
+    if (isWelcome) {
+      setIsWelcomeTyping(true);
+    }
     
     let currentIndex = 0;
     const typeInterval = setInterval(() => {
@@ -43,6 +49,10 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
         setMessages(prev => prev.map(msg => 
           msg.id === messageId ? { ...msg, isTyping: false } : msg
         ));
+        // Clear welcome typing state if this was the welcome message
+        if (isWelcome) {
+          setIsWelcomeTyping(false);
+        }
       }
     }, speed);
   };
@@ -83,16 +93,16 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
   useEffect(() => {
     if (messages.length === 1 && messages[0].isTyping) {
       const message = messages[0];
-      // Start typing effect after a short delay
+      // Start typing effect after a short delay - mark as welcome message
       setTimeout(() => {
-        startTypingEffect(message.id, message.content, 20);
+        startTypingEffect(message.id, message.content, 20, true);
       }, 500);
     }
   }, [messages]);
 
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isWelcomeTyping) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -167,7 +177,7 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !isWelcomeTyping) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -285,18 +295,29 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
 
           {/* Input Area */}
           <div className="p-3 sm:p-6 border-t border-[#1a1a1a] bg-gradient-to-r from-[#0a0a0a] to-[#1a1a1a]">
+            {isWelcomeTyping && (
+              <div className="mb-3 flex items-center gap-2 text-xs text-gray-400">
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+                <span>Aken is introducing himself...</span>
+              </div>
+            )}
             <div className="flex gap-2 sm:gap-3">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me anything about AI solutions..."
-                className="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-[#2a2a2a] rounded-xl bg-[#1a1a1a]/80 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500/50 focus:border-gray-500/50 text-sm sm:text-base transition-all duration-300 hover:border-[#3a3a3a]"
+                placeholder={isWelcomeTyping ? "Please wait while Aken introduces himself..." : "Ask me anything about AI solutions..."}
+                disabled={isWelcomeTyping}
+                className={`flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-[#2a2a2a] rounded-xl bg-[#1a1a1a]/80 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500/50 focus:border-gray-500/50 text-sm sm:text-base transition-all duration-300 hover:border-[#3a3a3a] ${isWelcomeTyping ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
               <button
                 onClick={handleSendMessage}
-                disabled={!inputValue.trim()}
+                disabled={!inputValue.trim() || isWelcomeTyping}
                 className="px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] text-white rounded-xl hover:from-[#3a3a3a] hover:to-[#4a4a4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-gray-500/25 transform hover:scale-105 disabled:transform-none"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1">
