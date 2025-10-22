@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import ChatProvider from "@/components/ChatProvider";
+import ConditionalChatButton from "@/components/ConditionalChatButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
       >
         <ChatProvider>
           {children}
+          <ConditionalChatButton />
         </ChatProvider>
       </body>
     </html>

@@ -132,7 +132,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-[#0a0a0a]/80 backdrop-blur-sm rounded-2xl border border-[#1a1a1a]/50 shadow-2xl p-8">
+        <div className="bg-[#0a0a0a]/80 rounded-2xl border border-[#1a1a1a]/50 shadow-2xl p-8">
           <form onSubmit={handleScheduleSubmit} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
