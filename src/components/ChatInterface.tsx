@@ -21,37 +21,30 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Helper function for typing effect
+  // Simple typing effect using state
+  const [typingText, setTypingText] = useState('');
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+
   const startTypingEffect = (messageId: string, fullText: string, speed: number = 25) => {
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        const messageElement = document.getElementById(`message-${messageId}`);
-        if (messageElement) {
-          let currentIndex = 0;
-          
-          const typeInterval = setInterval(() => {
-            if (currentIndex <= fullText.length) {
-              const partialText = fullText.substring(0, currentIndex);
-              const formattedText = partialText
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>');
-              messageElement.innerHTML = formattedText;
-              currentIndex++;
-              scrollToBottom();
-            } else {
-              clearInterval(typeInterval);
-              // Mark message as no longer typing
-              setMessages(prev => prev.map(msg => 
-                msg.id === messageId ? { ...msg, isTyping: false } : msg
-              ));
-            }
-          }, speed);
-        } else {
-          // Retry after a short delay if element not found
-          setTimeout(() => startTypingEffect(messageId, fullText, speed), 50);
-        }
-      });
-    }, 100);
+    setTypingMessageId(messageId);
+    setTypingText('');
+    
+    let currentIndex = 0;
+    const typeInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setTypingText(fullText.substring(0, currentIndex));
+        currentIndex++;
+        scrollToBottom();
+      } else {
+        clearInterval(typeInterval);
+        setTypingMessageId(null);
+        setTypingText('');
+        // Mark message as no longer typing
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId ? { ...msg, isTyping: false } : msg
+        ));
+      }
+    }, speed);
   };
 
 
@@ -87,10 +80,13 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
   }, [isOpen, messages.length]);
 
   // Start typing effect after message is rendered
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (messages.length === 1 && messages[0].isTyping) {
       const message = messages[0];
-      startTypingEffect(message.id, message.content, 20);
+      // Start typing effect after a short delay
+      setTimeout(() => {
+        startTypingEffect(message.id, message.content, 20);
+      }, 500);
     }
   }, [messages]);
 
@@ -243,9 +239,15 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
                           : 'bg-[#1a1a1a]/90 text-white border border-[#2a2a2a]/50 backdrop-blur-sm'
                       }`}
                     >
-                      {message.type === 'assistant' && message.isTyping ? (
+                      {message.type === 'assistant' && message.isTyping && typingMessageId === message.id ? (
                         <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-line">
-                          <span id={`message-${message.id}`}></span>
+                          <span 
+                            dangerouslySetInnerHTML={{
+                              __html: typingText
+                                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
+                                .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>')
+                            }}
+                          />
                         </div>
                       ) : (
                         <div 
