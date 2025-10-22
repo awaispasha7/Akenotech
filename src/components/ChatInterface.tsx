@@ -26,7 +26,10 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
     let currentIndex = 0;
     const messageElement = document.getElementById(`message-${messageId}`);
     
-    if (!messageElement) return;
+    if (!messageElement) {
+      console.warn(`Message element with id 'message-${messageId}' not found`);
+      return;
+    }
 
     const typeInterval = setInterval(() => {
       if (currentIndex <= fullText.length) {
@@ -76,11 +79,19 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
 
       setMessages([welcomeMessage]);
       
+      // Start typing effect after a short delay
       setTimeout(() => {
         typeMessage(welcomeMessage.id, welcomeText, 15);
       }, 1000);
+
+      // Fallback: if typing effect doesn't work, show full message after 5 seconds
+      setTimeout(() => {
+        setMessages(prev => prev.map(msg => 
+          msg.id === welcomeMessage.id && msg.isTyping ? { ...msg, isTyping: false } : msg
+        ));
+      }, 5000);
     }
-  }, [isOpen, messages.length, typeMessage]);
+  }, [isOpen, messages.length]);
 
 
   const handleSendMessage = async () => {
