@@ -21,47 +21,39 @@ export default function ChatInterface({ isOpen, onClose }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Typing effect function
-  const typeMessage = useCallback((messageId: string, fullText: string, speed: number = 30) => {
-    let currentIndex = 0;
-    let typeInterval: NodeJS.Timeout | null = null;
-    
-    const startTyping = () => {
-      const messageElement = document.getElementById(`message-${messageId}`);
-      
-      if (!messageElement) {
-        console.warn(`Message element with id 'message-${messageId}' not found`);
-        // Mark message as no longer typing if element not found
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageId ? { ...msg, isTyping: false } : msg
-        ));
-        return;
-      }
-
-      typeInterval = setInterval(() => {
-        if (currentIndex <= fullText.length) {
-          const partialText = fullText.substring(0, currentIndex);
-          const formattedText = partialText
-            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>');
-          messageElement.innerHTML = formattedText;
-          currentIndex++;
-          scrollToBottom();
+  // Helper function for typing effect
+  const startTypingEffect = (messageId: string, fullText: string, speed: number = 25) => {
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        const messageElement = document.getElementById(`message-${messageId}`);
+        if (messageElement) {
+          let currentIndex = 0;
+          
+          const typeInterval = setInterval(() => {
+            if (currentIndex <= fullText.length) {
+              const partialText = fullText.substring(0, currentIndex);
+              const formattedText = partialText
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #9ca3af; font-weight: 700;">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em style="color: #ffffff; font-weight: 600;">$1</em>');
+              messageElement.innerHTML = formattedText;
+              currentIndex++;
+              scrollToBottom();
+            } else {
+              clearInterval(typeInterval);
+              // Mark message as no longer typing
+              setMessages(prev => prev.map(msg => 
+                msg.id === messageId ? { ...msg, isTyping: false } : msg
+              ));
+            }
+          }, speed);
         } else {
-          if (typeInterval) {
-            clearInterval(typeInterval);
-            typeInterval = null;
-          }
-          // Mark message as no longer typing
-          setMessages(prev => prev.map(msg => 
-            msg.id === messageId ? { ...msg, isTyping: false } : msg
-          ));
+          // Retry after a short delay if element not found
+          setTimeout(() => startTypingEffect(messageId, fullText, speed), 50);
         }
-      }, speed);
-    };
+      });
+    }, 100);
+  };
 
-    startTyping();
-  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -98,21 +90,9 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
   useLayoutEffect(() => {
     if (messages.length === 1 && messages[0].isTyping) {
       const message = messages[0];
-      // Wait for DOM to be ready, then start typing
-      const startTyping = () => {
-        const messageElement = document.getElementById(`message-${message.id}`);
-        if (messageElement) {
-          typeMessage(message.id, message.content, 20);
-        } else {
-          // Retry after a short delay if element not found
-          setTimeout(startTyping, 100);
-        }
-      };
-      
-      // Start typing after a short delay to ensure DOM is ready
-      setTimeout(startTyping, 500);
+      startTypingEffect(message.id, message.content, 20);
     }
-  }, [messages, typeMessage]);
+  }, [messages]);
 
 
   const handleSendMessage = async () => {
@@ -158,9 +138,7 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
       setMessages(prev => [...prev, assistantMessage]);
       
       // Start typing effect after a short delay
-      setTimeout(() => {
-        typeMessage(assistantMessage.id, data.response, 25);
-      }, 500);
+      startTypingEffect(assistantMessage.id, data.response, 25);
     } catch (error) {
       console.error('Error:', error);
       
@@ -186,9 +164,7 @@ I'm your **AI Solutions Expert**! I specialize in transforming businesses with c
       setMessages(prev => [...prev, errorMessage]);
       
       // Start typing effect for error message
-      setTimeout(() => {
-        typeMessage(errorMessage.id, errorMessage.content, 25);
-      }, 500);
+      startTypingEffect(errorMessage.id, errorMessage.content, 25);
     } finally {
       setIsTyping(false);
     }
