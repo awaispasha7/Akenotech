@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import emailjs from '@emailjs/browser';
 
 // Loading component for better UX
 function LoadingSpinner() {
@@ -222,6 +223,34 @@ export default function CaseStudyPage() {
       
         // Open the Livekit Voice Agent PDF in a new tab
         window.open('/Voice assistant.pdf', '_blank');
+      
+      // Send EmailJS notification
+      try {
+        const serviceId = 'service_4yz4k76';
+        const templateId = 'template_xhb8548';
+        const publicKey = 'Id7n5AZzArVL9Zys_';
+
+        const templateParams = {
+          from_name: `${formData.firstName} ${formData.lastName}`,
+          from_email: formData.email,
+          company: 'Livekit Voice Agent Case Study Download',
+          message: `Case Study Download Details:
+          
+Name: ${formData.firstName} ${formData.lastName}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Case Study: Livekit Voice Agent
+Downloaded At: ${new Date().toLocaleString()}
+
+This user has downloaded the Livekit Voice Agent case study and their information has been saved to Firebase.`
+        };
+
+        await emailjs.send(serviceId, templateId, templateParams, publicKey);
+        console.log('EmailJS notification sent successfully');
+      } catch (emailError) {
+        console.error('EmailJS notification failed:', emailError);
+        // Don't show error to user as the main functionality (PDF download) worked
+      }
       
       // Show thank you message at bottom of form
       setShowThankYou(true);
