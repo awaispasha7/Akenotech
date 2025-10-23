@@ -43,6 +43,7 @@ export default function Home(): React.JSX.Element {
     <div className="min-h-screen">
       <Navbar />
       <Hero />
+      {/* Demo comment - Latest update with EmailJS integration and CORS fixes */}
       <TrustedCompanies />
       <AboutUs />
       <AreasOfExpertise />
