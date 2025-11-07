@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ConfirmationPage() {
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
@@ -36,8 +37,7 @@ export default function ConfirmationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl">
+    <div className="relative w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
           <button
@@ -137,6 +137,27 @@ export default function ConfirmationPage() {
           </div>
         </div>
       </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function ConfirmationPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center p-4">
+      <Suspense fallback={
+        <div className="relative w-full max-w-2xl">
+          <div className="bg-[#0a0a0a]/80 rounded-2xl border border-[#1a1a1a]/50 shadow-2xl p-8 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+            <p className="text-gray-300 text-lg">Loading confirmation...</p>
+          </div>
+        </div>
+      }>
+        <ConfirmationContent />
+      </Suspense>
     </div>
   );
 }
