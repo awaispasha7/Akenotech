@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '../../config/api';
+import emailjs from '@emailjs/browser';
 
 export default function SchedulePage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function SchedulePage() {
     available_slots_by_day?: Record<string, string[]>;
   } | null>(null);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load available slots on component mount
   useEffect(() => {
@@ -44,9 +46,47 @@ export default function SchedulePage() {
 
   const handleScheduleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
-      // Hit your backend consultation scheduling API
+      // FIRST: Send EmailJS notification (EXACT same as contact page)
+      // Clear only specific EmailJS cache if needed
+      if (typeof window !== 'undefined') {
+        // Only clear specific EmailJS cache keys, not all email-related keys
+        const emailjsKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('emailjs_') || key.includes('emailjs_cache')
+        );
+        emailjsKeys.forEach(key => localStorage.removeItem(key));
+      }
+
+      // EmailJS configuration (EXACT same as contact page)
+      const serviceId = 'service_4yz4k76';
+      const templateId = 'template_xhb8548';
+      const publicKey = 'Id7n5AZzArVL9Zys_';
+
+      const templateParams = {
+        from_name: scheduleForm.name,
+        from_email: scheduleForm.email,
+        company: scheduleForm.company || 'Not provided',
+        message: `Consultation Scheduling Details:\n\nName: ${scheduleForm.name}\nEmail: ${scheduleForm.email}\nPhone: ${scheduleForm.phone || 'Not provided'}\nCompany: ${scheduleForm.company || 'Not provided'}\nPreferred Date: ${scheduleForm.date || 'Not specified'}\nPreferred Time: ${scheduleForm.time || 'Not specified'}\nMessage: ${scheduleForm.message || 'No additional message'}\n\nThis user has scheduled a consultation and their information has been saved.`
+      };
+
+      console.log('Sending email with:', { serviceId, templateId, templateParams, publicKey });
+      
+      // Send email with template parameters (EXACT same as contact page)
+      const emailResult = await emailjs.send(
+        serviceId,
+        templateId,
+        templateParams, // Send without timestamp to avoid template issues
+        publicKey
+      );
+
+      console.log('EmailJS result:', emailResult);
+      if (emailResult.status !== 200) {
+        console.error('EmailJS error status:', emailResult.status);
+      }
+
+      // SECOND: Hit your backend consultation scheduling API (existing functionality)
       const response = await fetch(API_ENDPOINTS.CONSULTATION_SCHEDULE, {
         method: 'POST',
         headers: {
@@ -70,35 +110,37 @@ export default function SchedulePage() {
       }
 
       const data = await response.json();
+      console.log('Backend response:', data);
       
       if (data.success) {
-        setScheduleStatus({ type: 'success', message: data.message || 'Thank you! We&apos;ll contact you soon to confirm your consultation.' });
-        
         // Immediately refresh available slots to remove the booked time slot
         await loadAvailableSlots();
         
-        // Reset form after 3 seconds
-        setTimeout(() => {
-          setScheduleForm({
-            name: '',
-            email: '',
-            phone: '',
-            company: '',
-            date: '',
-            time: '',
-            message: ''
-          });
-          setScheduleStatus(null);
-        }, 3000);
+        // Navigate to confirmation page
+        const confirmationUrl = `/schedule/confirmation?name=${encodeURIComponent(scheduleForm.name)}&date=${encodeURIComponent(scheduleForm.date)}&time=${encodeURIComponent(scheduleForm.time)}`;
+        console.log('Navigating to confirmation page:', confirmationUrl);
+        
+        // Use window.location for more reliable navigation
+        window.location.href = confirmationUrl;
       } else {
         setScheduleStatus({ type: 'error', message: data.message || 'There was an error scheduling your consultation. Please try again.' });
+        setIsSubmitting(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error scheduling consultation:', error);
+      console.error('Error details:', error);
+      
+      // More detailed error information
+      if (error && typeof error === 'object') {
+        console.error('Error status:', error.status);
+        console.error('Error text:', error.text);
+      }
+      
       setScheduleStatus({ 
         type: 'error', 
-        message: error instanceof Error ? error.message : 'There was an error scheduling your consultation. Please try again or contact us directly.' 
+        message: error?.text || (error instanceof Error ? error.message : 'There was an error scheduling your consultation. Please try again or contact us directly.')
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -294,9 +336,17 @@ export default function SchedulePage() {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] hover:from-[#3a3a3a] hover:to-[#4a4a4a] text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-[#2a2a2a] to-[#3a3a3a] hover:from-[#3a3a3a] hover:to-[#4a4a4a] text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Schedule My Consultation
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Scheduling...
+                  </span>
+                ) : (
+                  'Schedule My Consultation'
+                )}
               </button>
             </div>
           </form>
