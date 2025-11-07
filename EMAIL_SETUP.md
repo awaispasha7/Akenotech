@@ -1,4 +1,4 @@
-# Email Setup Instructions
+mage # Email Setup Instructions
 
 To make the contact form work and send emails to `Ask@akenotech.com`, follow these steps:
 

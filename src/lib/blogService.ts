@@ -10,6 +10,7 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { uploadImageToCloudinary, deleteImageFromCloudinary } from './cloudinary';
 
 export interface BlogPost {
   id: string;
@@ -20,6 +21,7 @@ export interface BlogPost {
   date: string;
   tags: string[];
   readTime: string;
+  images?: string[]; // Array of image URLs
   createdAt: Timestamp;
 }
 
@@ -30,8 +32,16 @@ export const saveBlogPost = async (post: Omit<BlogPost, 'id' | 'createdAt'>) => 
       ...post,
       createdAt: Timestamp.now()
     });
+    
     return docRef.id;
-  } catch (error) {
+  } catch (error: any) {
+    // Check if it's a permission error
+    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+      console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
+      console.error('Go to: Firebase Console → Firestore Database → Rules');
+      console.error('Add this rule: allow read, write: if true; for blogPosts collection');
+      throw new Error('Firebase permission denied. Please update Firestore security rules in Firebase Console.');
+    }
     console.error('Error saving blog post:', error);
     throw error;
   }
@@ -52,7 +62,14 @@ export const getBlogPosts = async (): Promise<BlogPost[]> => {
     });
     
     return posts;
-  } catch (error) {
+  } catch (error: any) {
+    // Check if it's a permission error
+    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+      console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
+      console.error('Go to: Firebase Console → Firestore Database → Rules');
+      console.error('Add this rule: allow read, write: if true; for blogPosts collection');
+      throw new Error('Firebase permission denied. Please update Firestore security rules in Firebase Console.');
+    }
     console.error('Error getting blog posts:', error);
     throw error;
   }
@@ -62,7 +79,14 @@ export const getBlogPosts = async (): Promise<BlogPost[]> => {
 export const deleteBlogPost = async (postId: string) => {
   try {
     await deleteDoc(doc(db, 'blogPosts', postId));
-  } catch (error) {
+  } catch (error: any) {
+    // Check if it's a permission error
+    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+      console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
+      console.error('Go to: Firebase Console → Firestore Database → Rules');
+      console.error('Add this rule: allow read, write: if true; for blogPosts collection');
+      throw new Error('Firebase permission denied. Please update Firestore security rules in Firebase Console.');
+    }
     console.error('Error deleting blog post:', error);
     throw error;
   }
@@ -72,11 +96,55 @@ export const deleteBlogPost = async (postId: string) => {
 export const updateBlogPost = async (postId: string, updates: Partial<BlogPost>) => {
   try {
     await updateDoc(doc(db, 'blogPosts', postId), updates);
-  } catch (error) {
+  } catch (error: any) {
+    // Check if it's a permission error
+    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+      console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
+      console.error('Go to: Firebase Console → Firestore Database → Rules');
+      console.error('Add this rule: allow read, write: if true; for blogPosts collection');
+      throw new Error('Firebase permission denied. Please update Firestore security rules in Firebase Console.');
+    }
     console.error('Error updating blog post:', error);
     throw error;
   }
 };
+
+// Upload image to Cloudinary
+export const uploadBlogImage = async (file: File, postId: string): Promise<string> => {
+  try {
+    const folder = `blog-images/${postId}`;
+    const imageUrl = await uploadImageToCloudinary(file, folder);
+    return imageUrl;
+  } catch (error: any) {
+    console.error('Error uploading image:', error);
+    throw new Error('Failed to upload image. Please try again.');
+  }
+};
+
+// Upload multiple images
+export const uploadBlogImages = async (files: File[], postId: string): Promise<string[]> => {
+  try {
+    const uploadPromises = files.map(file => uploadBlogImage(file, postId));
+    const urls = await Promise.all(uploadPromises);
+    return urls;
+  } catch (error) {
+    console.error('Error uploading images:', error);
+    throw error;
+  }
+};
+
+// Delete image from Cloudinary
+export const deleteBlogImage = async (imageUrl: string): Promise<void> => {
+  try {
+    await deleteImageFromCloudinary(imageUrl);
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    // Don't throw - image deletion failure shouldn't break the app
+  }
+};
+
+
+
 
 
 
