@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useChat } from '../components/ChatProvider';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import TrustedCompanies from './components/TrustedCompanies';
@@ -13,8 +15,22 @@ import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
-export default function Home(): React.JSX.Element {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const { setChatOpen } = useChat();
+
   useEffect(() => {
+    // Check if chatbot should be opened from query parameter
+    const openChat = searchParams.get('openChat');
+    if (openChat === 'true') {
+      // Small delay to ensure page is fully loaded
+      setTimeout(() => {
+        setChatOpen(true);
+        // Clean up URL by removing query parameter
+        window.history.replaceState({}, '', '/');
+      }, 300);
+    }
+
     // Handle hash navigation when page loads (e.g., from blog page)
     const handleHashNavigation = () => {
       const hash = window.location.hash.substring(1);
@@ -37,7 +53,7 @@ export default function Home(): React.JSX.Element {
     return () => {
       window.removeEventListener('hashchange', handleHashNavigation);
     };
-  }, []);
+  }, [searchParams, setChatOpen]);
 
   return (
     <div className="min-h-screen">
@@ -54,5 +70,17 @@ export default function Home(): React.JSX.Element {
       <Contact />
       <Footer />
     </div>
+  );
+}
+
+export default function Home(): React.JSX.Element {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -154,8 +154,8 @@ export default function SchedulePage() {
         <div className="text-center mb-8">
           <button
             onClick={() => {
-              // Open chatbot directly on this page
-              setChatOpen(true);
+              // Navigate to home page and open chatbot
+              router.push('/?openChat=true');
             }}
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6"
           >
