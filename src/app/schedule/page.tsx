@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '../../config/api';
 import emailjs from '@emailjs/browser';
+import { useChat } from '../../components/ChatProvider';
 
 export default function SchedulePage() {
   const router = useRouter();
+  const { setChatOpen } = useChat();
   const [scheduleForm, setScheduleForm] = useState({
     name: '',
     email: '',
@@ -151,7 +153,10 @@ export default function SchedulePage() {
         {/* Header */}
         <div className="text-center mb-8">
           <button
-            onClick={() => router.back()}
+            onClick={() => {
+              // Open chatbot directly on this page
+              setChatOpen(true);
+            }}
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
