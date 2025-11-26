@@ -1,6 +1,13 @@
 // Akenotech/src/app/api/generate-video/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
+type N8nStartResponse = {
+  jobId?: string;
+  id?: string;
+  workflowId?: string;
+  [key: string]: unknown;
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -30,13 +37,34 @@ export async function POST(req: NextRequest) {
 
     const site = "akenotech";
 
-    const n8nRes = await fetch(webhookUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt, duration, site }),
-    });
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
+    let n8nRes: Response;
+    try {
+      n8nRes = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt, duration, site }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchErr) {
+      clearTimeout(timeoutId);
+      if (fetchErr instanceof Error && fetchErr.name === "AbortError") {
+        return NextResponse.json(
+          {
+            error: "n8n webhook request timed out. Please check your n8n workflow configuration.",
+            details: "The webhook did not respond within 25 seconds. Make sure it's set to 'Respond: Immediately'.",
+          },
+          { status: 504 }
+        );
+      }
+      throw fetchErr;
+    }
 
     if (!n8nRes.ok) {
       const text = await n8nRes.text().catch(() => "");
@@ -49,13 +77,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data = await n8nRes.json().catch(() => ({}));
-    const jobId = (data as any).jobId ?? (data as any).id ?? (data as any).workflowId;
+    const responseText = await n8nRes.text();
+    let data: N8nStartResponse;
+    
+    try {
+      data = JSON.parse(responseText) as N8nStartResponse;
+    } catch (parseErr) {
+      console.error("Failed to parse n8n response:", responseText);
+      return NextResponse.json(
+        {
+          error: "n8n returned invalid JSON response.",
+          details: `Response was: ${responseText.substring(0, 200)}`,
+        },
+        { status: 502 }
+      );
+    }
+
+    const jobId = data.jobId ?? data.id ?? data.workflowId;
 
     if (!jobId || typeof jobId !== "string") {
+      console.error("n8n response missing jobId:", data);
       return NextResponse.json(
         {
           error: "n8n did not return a valid jobId.",
+          details: `Expected jobId, id, or workflowId. Received: ${JSON.stringify(data)}`,
         },
         { status: 500 }
       );
