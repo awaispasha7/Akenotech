@@ -58,7 +58,7 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
       challenge: "Need for engaging storytelling platform.",
       solution: "Custom digital storytelling solution with interactive features.",
       outcome: "Enhanced user engagement and storytelling capabilities.",
-      backgroundImage: "/case1.jpg",
+      backgroundImage: "/stories-we-tell-hero.jpg",
       stripeColor: "bg-indigo-600",
       stripeText: "SWT Stories",
       companyName: "Stories We Tell"
