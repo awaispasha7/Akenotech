@@ -52,6 +52,16 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
       stripeColor: "bg-blue-600",
       stripeText: "LK Livekit",
       companyName: "Livekit Voice Agent"
+    },
+    {
+      title: "Stories We Tell",
+      challenge: "Need for engaging storytelling platform.",
+      solution: "Custom digital storytelling solution with interactive features.",
+      outcome: "Enhanced user engagement and storytelling capabilities.",
+      backgroundImage: "/case1.jpg",
+      stripeColor: "bg-indigo-600",
+      stripeText: "SWT Stories",
+      companyName: "Stories We Tell"
     }
   ], []);
 
@@ -163,7 +173,9 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
                       ? 'AI-powered field service management platform for contractors. Streamlines operations and enhances customer communication. Helps field service businesses scale efficiently.'
                       : useCase.companyName === 'Livekit Voice Agent'
                         ? 'Engineered a Livekit Voice Agent, a dynamic, real-time conversational AI system. Designed for complex, flow-based customer support with multi-voice capabilities.'
-                        : 'AI-powered rental listing analyzer that uncovers hidden risks and strengths. Identifies complaints, bias, and sentiment changes for confident booking decisions. Simple chat interface for structured inspections.'
+                        : useCase.companyName === 'Stories We Tell'
+                          ? 'Custom digital storytelling platform with interactive features. Designed to enhance user engagement and provide a unique storytelling experience.'
+                          : 'AI-powered rental listing analyzer that uncovers hidden risks and strengths. Identifies complaints, bias, and sentiment changes for confident booking decisions. Simple chat interface for structured inspections.'
                     }
                   </p>
                 </div>
@@ -184,6 +196,9 @@ const HighlightedUseCases: React.FC<HighlightedUseCasesProps> = (): React.JSX.El
                       } else if (useCase.companyName === 'Livekit Voice Agent') {
                         console.log('Navigating to Livekit Voice Agent case study');
                         router.push('/case-study/livekit-voice-agent');
+                      } else if (useCase.companyName === 'Stories We Tell') {
+                        console.log('Navigating to Stories We Tell case study');
+                        router.push('/case-study/Stories-we-tell');
                       } else {
                         console.log('Default navigation to BookYolo');
                         router.push('/case-study/bookyolo');
