@@ -732,7 +732,7 @@ This user has downloaded the Stories We Tell case study and their information ha
 
                     <Image 
 
-                      src="/stories-we-tell-hero.jpg" 
+                      src="/stories-we-tell-hero.png" 
 
                       alt="Stories We Tell Hero" 
 
