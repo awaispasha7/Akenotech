@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(responseText) as N8nStartResponse;
     } catch (parseErr) {
-      console.error("Failed to parse n8n response:", responseText);
+      console.error("[Start] Failed to parse n8n response:", responseText);
       return NextResponse.json(
         {
           error: "n8n returned invalid JSON response.",
@@ -95,17 +95,22 @@ export async function POST(req: NextRequest) {
 
     const jobId = data.jobId ?? data.id ?? data.workflowId;
 
+    console.log("[Start] n8n webhook response:", JSON.stringify(data, null, 2));
+    console.log("[Start] Extracted jobId:", jobId);
+
     if (!jobId || typeof jobId !== "string") {
-      console.error("n8n response missing jobId:", data);
+      console.error("[Start] n8n response missing jobId. Full response:", JSON.stringify(data, null, 2));
       return NextResponse.json(
         {
           error: "n8n did not return a valid jobId.",
-          details: `Expected jobId, id, or workflowId. Received: ${JSON.stringify(data)}`,
+          details: `Expected jobId, id, or workflowId in the response. Received: ${JSON.stringify(data)}. Make sure your n8n webhook node returns a JSON object with a 'jobId' field containing the same jobId that will be used in the callback.`,
         },
         { status: 500 }
       );
     }
 
+    console.log("[Start] Successfully extracted jobId from n8n:", jobId);
+    console.log("[Start] Returning jobId to frontend. IMPORTANT: n8n callback must use this EXACT jobId:", jobId);
     return NextResponse.json({ jobId });
   } catch (err) {
     console.error("Error in /api/generate-video:", err);
