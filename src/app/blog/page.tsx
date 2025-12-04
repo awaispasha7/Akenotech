@@ -11,12 +11,14 @@ import { parseDocument } from '../../lib/fileParser';
 import { uploadDocumentToCloudinary } from '../../lib/cloudinary';
 import { useAuth } from '@/components/AuthProvider';
 import { signOutUser } from '@/lib/authService';
+import { isAdmin } from '@/lib/adminUtils';
 
 // BlogPost interface is now imported from blogService
 
 export default function BlogPage(): React.JSX.Element {
   const router = useRouter();
   const { user, userData, loading: authLoading } = useAuth();
+  const userIsAdmin = isAdmin(userData, user?.email || null);
   const [isVisible, setIsVisible] = useState(false);
   const [animatedElements, setAnimatedElements] = useState<number[]>([]);
   const [isWritingMode, setIsWritingMode] = useState(false);
@@ -244,7 +246,7 @@ export default function BlogPage(): React.JSX.Element {
           readTime: Math.ceil(newPost.content.split(' ').length / 200) + ' min read'
         };
 
-        await updateBlogPost(editingPost.id, updatedData, user.uid);
+        await updateBlogPost(editingPost.id, updatedData, user.uid, userIsAdmin);
         console.log('✅ Blog post updated successfully');
         
         // Handle images: keep existing ones that are still in previews, add new ones
@@ -252,7 +254,7 @@ export default function BlogPage(): React.JSX.Element {
         let finalImageUrls = existingImageUrls;
         
         // Update with existing images first (in case some were removed)
-        await updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid);
+        await updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid, userIsAdmin);
         
         // Upload new images if any (don't block update if this fails)
         if (selectedImages.length > 0) {
@@ -261,7 +263,7 @@ export default function BlogPage(): React.JSX.Element {
           uploadBlogImages(selectedImages, editingPost.id)
             .then((newImageUrls) => {
               finalImageUrls = [...existingImageUrls, ...newImageUrls];
-              return updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid);
+              return updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid, userIsAdmin);
             })
             .then(() => {
               // Reload posts to show updated post with images
@@ -312,7 +314,7 @@ export default function BlogPage(): React.JSX.Element {
 
     if (window.confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
       try {
-        await deleteBlogPost(postId, user.uid);
+        await deleteBlogPost(postId, user.uid, userIsAdmin);
         console.log('✅ Blog post deleted successfully');
         // Reload posts to ensure we have the latest data
         const updatedPosts = await getBlogPosts();
@@ -2025,8 +2027,8 @@ export default function BlogPage(): React.JSX.Element {
                       <p className="text-gray-400 text-xs">{post.readTime}</p>
                     </div>
                     
-                    {/* Edit and Delete Buttons - Only show if user owns the post */}
-                    {user && post.userId === user.uid && (
+                    {/* Edit and Delete Buttons - Show if user owns the post or is admin */}
+                    {user && (post.userId === user.uid || userIsAdmin) && (
                       <div className="flex gap-1">
                         <button
                           onClick={(e) => {

@@ -5,16 +5,20 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useChat } from '../../components/ChatProvider';
+import { useAuth } from '@/components/AuthProvider';
+import { signOutUser } from '@/lib/authService';
 
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isResourcesDropdownOpen, setIsResourcesDropdownOpen] = useState<boolean>(false);
+  const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState<boolean>(false);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const isBlogPage = pathname === '/blog';
   const { setChatOpen } = useChat();
+  const { user, userData } = useAuth();
 
   const handleNavigation = useCallback((sectionId: string): void => {
     if (isBlogPage) {
@@ -51,6 +55,30 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
     }, 150); // Small delay to allow clicking
     setDropdownTimeout(timeout);
   }, []);
+
+  const handleAccountDropdownMouseEnter = useCallback(() => {
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+      setDropdownTimeout(null);
+    }
+    setIsAccountDropdownOpen(true);
+  }, [dropdownTimeout]);
+
+  const handleAccountDropdownMouseLeave = useCallback(() => {
+    const timeout = setTimeout(() => {
+      setIsAccountDropdownOpen(false);
+    }, 150);
+    setDropdownTimeout(timeout);
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      setIsAccountDropdownOpen(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -152,8 +180,42 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
             </div>
           </div>
 
-          {/* CTA Button - Show on tablets and up */}
-          <div className="hidden lg:block">
+          {/* Account Icon & CTA Button - Show on tablets and up */}
+          <div className="hidden lg:flex items-center gap-3">
+            {user ? (
+              <div className="relative">
+                <button
+                  onMouseEnter={handleAccountDropdownMouseEnter}
+                  onMouseLeave={handleAccountDropdownMouseLeave}
+                  className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors duration-200 border border-gray-600"
+                  aria-label="Account menu"
+                >
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
+                
+                {/* Account Dropdown Menu */}
+                {isAccountDropdownOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-700"
+                    onMouseEnter={handleAccountDropdownMouseEnter}
+                    onMouseLeave={handleAccountDropdownMouseLeave}
+                  >
+                    <div className="px-4 py-2 border-b border-gray-700">
+                      <p className="text-sm text-white font-medium truncate">{userData?.displayName || user.email}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : null}
             <button
               onClick={handleContactClick}
               className="bg-gray-800 hover:bg-gray-700 text-white px-4 xl:px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-gray-600 whitespace-nowrap"
@@ -244,6 +306,17 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
                   Blog
                 </Link>
               </div>
+              {user && (
+                <div className="px-3 py-2 border-t border-gray-700 mt-2">
+                  <div className="text-white text-sm font-medium mb-1">{userData?.displayName || user.email}</div>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left text-gray-300 hover:text-white text-sm font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
               <button
                 onClick={handleContactClick}
                 className="w-full text-left bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-base font-medium mt-4 border border-gray-600"
