@@ -1,16 +1,22 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import { getBlogPosts, saveBlogPost, deleteBlogPost, updateBlogPost, uploadBlogImages, BlogPost } from '../../lib/blogService';
 import { Timestamp } from 'firebase/firestore';
 import Image from 'next/image';
 import { parseDocument } from '../../lib/fileParser';
 import { uploadDocumentToCloudinary } from '../../lib/cloudinary';
+import { useAuth } from '@/components/AuthProvider';
+import { signOutUser } from '@/lib/authService';
 
 // BlogPost interface is now imported from blogService
 
 export default function BlogPage(): React.JSX.Element {
+  const router = useRouter();
+  const { user, userData, loading: authLoading } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [animatedElements, setAnimatedElements] = useState<number[]>([]);
   const [isWritingMode, setIsWritingMode] = useState(false);
@@ -19,7 +25,7 @@ export default function BlogPage(): React.JSX.Element {
     title: '',
     content: '',
     excerpt: '',
-    author: 'Akeno Tech Team',
+    author: userData?.displayName || 'Akeno Tech Team',
     tags: [] as string[],
   });
   const [tagInput, setTagInput] = useState('');
@@ -37,6 +43,13 @@ export default function BlogPage(): React.JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Update author when user data loads
+  useEffect(() => {
+    if (userData?.displayName) {
+      setNewPost(prev => ({ ...prev, author: userData.displayName }));
+    }
+  }, [userData]);
 
   useEffect(() => {
     // Load blog posts from Firebase
@@ -93,6 +106,12 @@ export default function BlogPage(): React.JSX.Element {
   };
 
   const handlePublishPost = async () => {
+    // Check authentication
+    if (!user || !user.uid) {
+      router.push('/auth/login');
+      return;
+    }
+
     if (newPost.title && newPost.content) {
       if (isEditing && editingPost) {
         await handleUpdatePost();
@@ -109,8 +128,8 @@ export default function BlogPage(): React.JSX.Element {
             readTime: Math.ceil(newPost.content.split(' ').length / 200) + ' min read'
           };
 
-          // Save to Firebase first to get post ID
-          const postId = await saveBlogPost(postData);
+          // Save to Firebase first to get post ID (requires userId)
+          const postId = await saveBlogPost(postData, user.uid, userData?.displayName);
           console.log('✅ Blog post saved successfully');
           
           // Upload images if any (don't block publishing if this fails)
@@ -121,8 +140,8 @@ export default function BlogPage(): React.JSX.Element {
               .then((imageUrls) => {
                 console.log('✅ Images uploaded successfully:', imageUrls);
                 if (imageUrls && imageUrls.length > 0) {
-                  // Update the post with image URLs if upload succeeds
-                  return updateBlogPost(postId, { images: imageUrls });
+                  // Update the post with image URLs if upload succeeds (requires userId)
+                  return updateBlogPost(postId, { images: imageUrls }, user.uid);
                 } else {
                   throw new Error('No image URLs returned');
                 }
@@ -207,6 +226,12 @@ export default function BlogPage(): React.JSX.Element {
   };
 
   const handleUpdatePost = async () => {
+    // Check authentication
+    if (!user || !user.uid) {
+      router.push('/auth/login');
+      return;
+    }
+
     if (editingPost && newPost.title && newPost.content) {
       setSavingPost(true);
       try {
@@ -219,7 +244,7 @@ export default function BlogPage(): React.JSX.Element {
           readTime: Math.ceil(newPost.content.split(' ').length / 200) + ' min read'
         };
 
-        await updateBlogPost(editingPost.id, updatedData);
+        await updateBlogPost(editingPost.id, updatedData, user.uid);
         console.log('✅ Blog post updated successfully');
         
         // Handle images: keep existing ones that are still in previews, add new ones
@@ -279,9 +304,15 @@ export default function BlogPage(): React.JSX.Element {
   };
 
   const handleDeletePost = async (postId: string) => {
+    // Check authentication
+    if (!user || !user.uid) {
+      router.push('/auth/login');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
       try {
-        await deleteBlogPost(postId);
+        await deleteBlogPost(postId, user.uid);
         console.log('✅ Blog post deleted successfully');
         // Reload posts to ensure we have the latest data
         const updatedPosts = await getBlogPosts();
@@ -1463,47 +1494,91 @@ export default function BlogPage(): React.JSX.Element {
             Stay updated with the latest trends, insights, and innovations in artificial intelligence and technology.
           </p>
           
-          {/* Write New Post or Upload Document Buttons */}
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <button
-              onClick={() => {
-                setIsWritingMode(!isWritingMode);
-                setIsUploadMode(false);
-              }}
-              className="group relative bg-gradient-to-r from-white to-gray-100 text-black px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-white/30 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10 group-hover:text-gray-900 transition-colors duration-300 flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>{isWritingMode ? 'Cancel Writing' : 'Write New Post'}</span>
-              </span>
-              <div className="absolute inset-0 -top-2 -left-2 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-            </button>
+          {/* Auth Status */}
+          {!authLoading && (
+            <div className="flex items-center justify-center gap-4 mb-8">
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <div className="text-gray-300">
+                    Signed in as <span className="font-semibold text-white">{userData?.displayName || user.email}</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await signOutUser();
+                        router.push('/blog');
+                      } catch (error) {
+                        console.error('Error signing out:', error);
+                      }
+                    }}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all text-sm"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-400">Sign in to create and manage posts</span>
+                  <Link
+                    href="/auth/login"
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg transition-all text-sm font-semibold"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg transition-all text-sm font-semibold"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
-            <span className="text-gray-500 text-lg">OR</span>
+          {/* Write New Post or Upload Document Buttons - Only show if authenticated */}
+          {user && (
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <button
+                onClick={() => {
+                  setIsWritingMode(!isWritingMode);
+                  setIsUploadMode(false);
+                }}
+                className="group relative bg-gradient-to-r from-white to-gray-100 text-black px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-white/30 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10 group-hover:text-gray-900 transition-colors duration-300 flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>{isWritingMode ? 'Cancel Writing' : 'Write New Post'}</span>
+                </span>
+                <div className="absolute inset-0 -top-2 -left-2 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              </button>
 
-            <button
-              onClick={() => {
-                setIsUploadMode(!isUploadMode);
-                setIsWritingMode(false);
-                if (!isUploadMode && documentInputRef.current) {
-                  documentInputRef.current.click();
-                }
-              }}
-              className="group relative bg-gradient-to-r from-purple-600 to-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/30 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10 group-hover:text-white transition-colors duration-300 flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <span>Upload Document</span>
-              </span>
-              <div className="absolute inset-0 -top-2 -left-2 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-            </button>
-          </div>
+              <span className="text-gray-500 text-lg">OR</span>
+
+              <button
+                onClick={() => {
+                  setIsUploadMode(!isUploadMode);
+                  setIsWritingMode(false);
+                  if (!isUploadMode && documentInputRef.current) {
+                    documentInputRef.current.click();
+                  }
+                }}
+                className="group relative bg-gradient-to-r from-purple-600 to-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/30 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10 group-hover:text-white transition-colors duration-300 flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span>Upload Document</span>
+                </span>
+                <div className="absolute inset-0 -top-2 -left-2 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              </button>
+            </div>
+          )}
           
           {/* Hidden document input */}
           <input
@@ -1948,34 +2023,36 @@ export default function BlogPage(): React.JSX.Element {
                       <p className="text-gray-400 text-xs">{post.readTime}</p>
                     </div>
                     
-                    {/* Edit and Delete Buttons */}
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditPost(post);
-                        }}
-                        className="w-7 h-7 bg-blue-600/20 hover:bg-blue-600/40 backdrop-blur-sm text-blue-300 hover:text-blue-200 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25 border border-blue-500/30"
-                        title="Edit this post"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePost(post.id);
-                        }}
-                        className="w-7 h-7 bg-red-600/20 hover:bg-red-600/40 backdrop-blur-sm text-red-300 hover:text-red-200 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/25 border border-red-500/30"
-                        title="Delete this post"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
+                    {/* Edit and Delete Buttons - Only show if user owns the post */}
+                    {user && post.userId === user.uid && (
+                      <div className="flex gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPost(post);
+                          }}
+                          className="w-7 h-7 bg-blue-600/20 hover:bg-blue-600/40 backdrop-blur-sm text-blue-300 hover:text-blue-200 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25 border border-blue-500/30"
+                          title="Edit this post"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePost(post.id);
+                          }}
+                          className="w-7 h-7 bg-red-600/20 hover:bg-red-600/40 backdrop-blur-sm text-red-300 hover:text-red-200 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/25 border border-red-500/30"
+                          title="Delete this post"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

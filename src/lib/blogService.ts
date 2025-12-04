@@ -5,6 +5,7 @@ import {
   doc, 
   deleteDoc, 
   updateDoc,
+  getDoc,
   query, 
   orderBy, 
   Timestamp 
@@ -23,18 +24,26 @@ export interface BlogPost {
   readTime: string;
   images?: string[]; // Array of image URLs
   createdAt: Timestamp;
+  userId: string; // User who created the post
+  userDisplayName?: string; // Display name of the user
 }
 
-// Save a new blog post to Firebase
-export const saveBlogPost = async (post: Omit<BlogPost, 'id' | 'createdAt'>) => {
+// Save a new blog post to Firebase (requires userId)
+export const saveBlogPost = async (post: Omit<BlogPost, 'id' | 'createdAt' | 'userId'>, userId: string, userDisplayName?: string) => {
+  if (!userId) {
+    throw new Error('User must be authenticated to create blog posts.');
+  }
+  
   try {
     const docRef = await addDoc(collection(db, 'blogPosts'), {
       ...post,
+      userId,
+      userDisplayName: userDisplayName || post.author,
       createdAt: Timestamp.now()
     });
     
     return docRef.id;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if it's a permission error
     if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
       console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
@@ -62,9 +71,10 @@ export const getBlogPosts = async (): Promise<BlogPost[]> => {
     });
     
     return posts;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string; message?: string };
     // Check if it's a permission error
-    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+    if (firebaseError?.code === 'permission-denied' || firebaseError?.message?.includes('permission')) {
       console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
       console.error('Go to: Firebase Console → Firestore Database → Rules');
       console.error('Add this rule: allow read, write: if true; for blogPosts collection');
@@ -75,13 +85,29 @@ export const getBlogPosts = async (): Promise<BlogPost[]> => {
   }
 };
 
-// Delete a blog post from Firebase
-export const deleteBlogPost = async (postId: string) => {
+// Delete a blog post from Firebase (requires userId to verify ownership)
+export const deleteBlogPost = async (postId: string, userId: string) => {
+  if (!userId) {
+    throw new Error('User must be authenticated to delete blog posts.');
+  }
+  
   try {
+    // Verify ownership before deleting
+    const postDoc = await getDoc(doc(db, 'blogPosts', postId));
+    if (!postDoc.exists()) {
+      throw new Error('Blog post not found.');
+    }
+    
+    const postData = postDoc.data() as BlogPost;
+    if (postData.userId !== userId) {
+      throw new Error('You can only delete your own blog posts.');
+    }
+    
     await deleteDoc(doc(db, 'blogPosts', postId));
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string; message?: string };
     // Check if it's a permission error
-    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+    if (firebaseError?.code === 'permission-denied' || firebaseError?.message?.includes('permission')) {
       console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
       console.error('Go to: Firebase Console → Firestore Database → Rules');
       console.error('Add this rule: allow read, write: if true; for blogPosts collection');
@@ -92,13 +118,29 @@ export const deleteBlogPost = async (postId: string) => {
   }
 };
 
-// Update a blog post in Firebase
-export const updateBlogPost = async (postId: string, updates: Partial<BlogPost>) => {
+// Update a blog post in Firebase (requires userId to verify ownership)
+export const updateBlogPost = async (postId: string, updates: Partial<BlogPost>, userId: string) => {
+  if (!userId) {
+    throw new Error('User must be authenticated to update blog posts.');
+  }
+  
   try {
+    // Verify ownership before updating
+    const postDoc = await getDoc(doc(db, 'blogPosts', postId));
+    if (!postDoc.exists()) {
+      throw new Error('Blog post not found.');
+    }
+    
+    const postData = postDoc.data() as BlogPost;
+    if (postData.userId !== userId) {
+      throw new Error('You can only update your own blog posts.');
+    }
+    
     await updateDoc(doc(db, 'blogPosts', postId), updates);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string; message?: string };
     // Check if it's a permission error
-    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+    if (firebaseError?.code === 'permission-denied' || firebaseError?.message?.includes('permission')) {
       console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
       console.error('Go to: Firebase Console → Firestore Database → Rules');
       console.error('Add this rule: allow read, write: if true; for blogPosts collection');

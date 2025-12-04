@@ -3,6 +3,7 @@ import "./globals.css";
 import { ReactNode } from "react";
 import ChatProvider from "@/components/ChatProvider";
 import ConditionalChatButton from "@/components/ConditionalChatButton";
+import AuthProvider from "@/components/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,10 +46,12 @@ export default function RootLayout({ children }: RootLayoutProps): React.JSX.Ele
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <ChatProvider>
-          {children}
-          <ConditionalChatButton />
-        </ChatProvider>
+        <AuthProvider>
+          <ChatProvider>
+            {children}
+            <ConditionalChatButton />
+          </ChatProvider>
+        </AuthProvider>
       </body>
     </html>
   );
