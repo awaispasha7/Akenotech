@@ -64,13 +64,13 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
   return (
     <nav className="bg-gray-900 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link 
             href="/"
             className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-200 group"
           >
-            <div className="w-10 h-10 md:w-12 md:h-12 mr-2 md:mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 mr-2 lg:mr-3 rounded-full overflow-hidden bg-black group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
               <Image
                 src="/final.png"
                 alt="Akeno Tech Logo"
@@ -80,41 +80,41 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
               />
             </div>
             <div className="group-hover:translate-x-1 transition-transform duration-300">
-              <span className="text-white text-lg md:text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Akeno</span>
-              <span className="text-white text-lg md:text-xl font-light ml-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Tech</span>
+              <span className="text-white text-lg lg:text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Akeno</span>
+              <span className="text-white text-lg lg:text-xl font-light ml-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-green-300 group-hover:to-blue-300 transition-all duration-500">Tech</span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
+          {/* Desktop Navigation - Show on tablets and up */}
+          <div className="hidden lg:block">
+            <div className="ml-6 xl:ml-10 flex items-baseline space-x-4 xl:space-x-8">
               <button
                 onClick={() => handleNavigation('areas-of-expertise')}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 Services
               </button>
               <button
                 onClick={() => handleNavigation('technologies-tools')}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 Technologies
               </button>
               <button
                 onClick={() => handleNavigation('highlighted-use-cases')}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 Case Studies
               </button>
               <button
                 onClick={() => handleNavigation('testimonials')}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 Testimonials
               </button>
               <button
                 onClick={handleContactClick}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap"
               >
                 Contact
               </button>
@@ -124,7 +124,7 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
                 <button
                   onMouseEnter={handleDropdownMouseEnter}
                   onMouseLeave={handleDropdownMouseLeave}
-                  className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center"
+                  className="text-white hover:text-gray-300 px-2 xl:px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center whitespace-nowrap"
                 >
                   Resources
                   <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,21 +152,22 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
+          {/* CTA Button - Show on tablets and up */}
+          <div className="hidden lg:block">
             <button
               onClick={handleContactClick}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-gray-600"
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 xl:px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 border border-gray-600 whitespace-nowrap"
             >
               Get a Free Consultation
             </button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile/Tablet menu button - Show on mobile and tablets */}
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-white hover:text-gray-300 focus:outline-none focus:text-gray-300 p-2 rounded-md hover:bg-gray-800 transition-colors duration-200"
+              aria-label="Toggle menu"
             >
               <svg className="h-6 w-6 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
@@ -179,15 +180,15 @@ const Navbar: React.FC<NavbarProps> = (): React.JSX.Element => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile/Tablet Navigation */}
         {isMenuOpen && (
           <>
             {/* Backdrop */}
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
               onClick={() => setIsMenuOpen(false)}
             />
-            <div className="md:hidden relative z-50">
+            <div className="lg:hidden relative z-50">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800 border-t border-gray-700 animate-in slide-in-from-top-2 duration-200">
               <button
                 onClick={() => {
