@@ -6,7 +6,7 @@ export default function VideoGenButton() {
   return (
     <Link
       href="/generate-video"
-      className="fixed left-4 sm:left-8 bottom-8 z-50 flex items-center gap-3 px-5 sm:px-6 py-4 sm:py-4 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-black font-bold rounded-2xl shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-emerald-400/30 animate-pulse hover:animate-none"
+      className="fixed left-4 sm:left-8 bottom-8 z-50 flex items-center gap-3 px-5 sm:px-6 py-4 sm:py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-black font-bold rounded-2xl shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-emerald-400/30 animate-pulse hover:animate-none"
       aria-label="Generate AI Video"
     >
       {/* Video Icon */}

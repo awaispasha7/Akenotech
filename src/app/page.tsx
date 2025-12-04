@@ -69,7 +69,7 @@ function HomeContent() {
       <HighlightedUseCases />
 
       {/* AI Video Generation CTA - Prominent Section */}
-      <section id="video-generation" className="relative bg-linear-to-br from-emerald-900/30 via-[#050816] to-purple-900/30 text-white border-y-2 border-emerald-500/30 overflow-hidden">
+      <section id="video-generation" className="relative bg-gradient-to-br from-emerald-900/30 via-[#050816] to-purple-900/30 text-white border-y-2 border-emerald-500/30 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
@@ -94,7 +94,7 @@ function HomeContent() {
             <div className="space-y-6 md:space-y-8">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 Try Our New{' '}
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
                   AI Video Generation
                 </span>{' '}
                 Module
@@ -106,19 +106,15 @@ function HomeContent() {
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <a
-                  href="#video-generation"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('video-generation')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                <Link
+                  href="/generate-video"
                   className="group inline-flex items-center justify-center bg-emerald-500 text-black px-8 py-4 rounded-full font-bold text-base shadow-2xl hover:shadow-emerald-500/50 hover:bg-emerald-400 hover:scale-105 transition-all"
                 >
                   Generate Video Now
                   <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                </a>
+                </Link>
               </div>
             </div>
             
@@ -154,7 +150,7 @@ function HomeContent() {
                 </ul>
               </div>
               
-              <div className="bg-linear-to-r from-emerald-500/10 to-purple-500/10 border border-emerald-400/30 rounded-xl p-4 text-center">
+              <div className="bg-gradient-to-r from-emerald-500/10 to-purple-500/10 border border-emerald-400/30 rounded-xl p-4 text-center">
                 <p className="text-sm text-emerald-300 font-semibold">
                   🎬 Powered by modern tools (Sora 2, Grok Imagine, Veo 3.1 and many more) · Beta Access Available Now
                 </p>
