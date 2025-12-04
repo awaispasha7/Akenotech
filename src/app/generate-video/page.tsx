@@ -313,16 +313,21 @@ export default function GenerateVideoPage() {
               <button
                 onClick={async () => {
                   setShowExamples(true);
-                  if (exampleVideos.length === 0) {
-                    setLoadingExamples(true);
-                    try {
-                      const videos = await getGeneratedVideos();
-                      setExampleVideos(videos.filter(v => v.status === 'done'));
-                    } catch (error) {
-                      console.error('Error loading example videos:', error);
-                    } finally {
-                      setLoadingExamples(false);
-                    }
+                  // Always reload videos when opening the modal
+                  setLoadingExamples(true);
+                  try {
+                    console.log('[Frontend] Loading example videos...');
+                    const videos = await getGeneratedVideos();
+                    console.log('[Frontend] Received videos:', videos.length);
+                    const doneVideos = videos.filter(v => v.status === 'done');
+                    console.log('[Frontend] Filtered done videos:', doneVideos.length);
+                    setExampleVideos(doneVideos);
+                  } catch (error) {
+                    console.error('[Frontend] Error loading example videos:', error);
+                    // Show error to user
+                    setErrorMessage('Failed to load example videos. Please check console for details.');
+                  } finally {
+                    setLoadingExamples(false);
                   }
                 }}
                 className="inline-flex items-center justify-center border-2 border-emerald-400/50 text-emerald-300 px-6 py-3 rounded-full font-semibold text-sm hover:bg-emerald-400/10 hover:border-emerald-400 transition-all"
