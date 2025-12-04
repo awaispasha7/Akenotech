@@ -39,20 +39,20 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black flex flex-col">
       <Navbar />
       
-      <main className="flex-1 flex items-center justify-center px-4 py-20 relative">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12 sm:py-20 relative">
         {/* Background floating elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-56 sm:w-80 h-56 sm:h-80 bg-blue-500/5 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="w-full max-w-md relative z-10">
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl border border-gray-700/50 p-8 shadow-2xl shadow-purple-500/20">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl border border-gray-700/50 p-6 sm:p-8 shadow-2xl shadow-purple-500/20">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
                 Sign In
               </h1>
-              <p className="text-gray-400">Sign in to manage your blog posts</p>
+              <p className="text-sm sm:text-base text-gray-400">Sign in to manage your blog posts</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

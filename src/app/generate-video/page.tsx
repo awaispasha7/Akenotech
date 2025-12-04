@@ -1,13 +1,19 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getGeneratedVideos, GeneratedVideo } from "@/lib/videoService";
+import { useAuth } from "@/components/AuthProvider";
+import { getUserCredits } from "@/lib/creditService";
 
 type Status = "idle" | "starting" | "waiting" | "done" | "error";
 
 export default function GenerateVideoPage() {
+  const router = useRouter();
+  const { user, userData, loading: authLoading } = useAuth();
   const [prompt, setPrompt] = useState("");
   const [duration, setDuration] = useState("10");
   const [status, setStatus] = useState<Status>("idle");
@@ -20,6 +26,21 @@ export default function GenerateVideoPage() {
   const [exampleVideos, setExampleVideos] = useState<GeneratedVideo[]>([]);
   const [loadingExamples, setLoadingExamples] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<GeneratedVideo | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [isUnlimited, setIsUnlimited] = useState(false);
+
+  // Load user credits
+  useEffect(() => {
+    if (user?.uid) {
+      getUserCredits(user.uid).then((userCredits) => {
+        setCredits(userCredits.credits);
+        setIsUnlimited(userCredits.isUnlimited || false);
+      });
+    } else {
+      setCredits(null);
+      setIsUnlimited(false);
+    }
+  }, [user]);
 
   // Rotating loading messages
   useEffect(() => {
@@ -197,6 +218,12 @@ export default function GenerateVideoPage() {
     setErrorMessage(null);
     setVideoUrl(null);
 
+    // Check authentication
+    if (!user || !user.uid) {
+      router.push('/auth/login');
+      return;
+    }
+
     if (!prompt.trim()) {
       setErrorMessage("Please enter a prompt.");
       return;
@@ -214,7 +241,7 @@ export default function GenerateVideoPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt, duration }),
+        body: JSON.stringify({ prompt, duration, userId: user.uid }),
         signal: controller.signal,
       });
 
@@ -227,6 +254,23 @@ export default function GenerateVideoPage() {
           .catch(() => ({} as ApiErrorResponse));
         const errorMsg = data.error || "Failed to start video generation.";
         const details = data.details ? ` ${data.details}` : "";
+        
+        // Handle authentication/authorization errors
+        if (res.status === 401) {
+          router.push('/auth/login');
+          return;
+        }
+        
+        if (res.status === 403) {
+          // Refresh credits display
+          if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+              setCredits(userCredits.credits);
+              setIsUnlimited(userCredits.isUnlimited || false);
+            });
+          }
+        }
+        
         throw new Error(errorMsg + details);
       }
 
@@ -244,6 +288,14 @@ export default function GenerateVideoPage() {
       console.log("[Frontend] Setting jobId state to:", data.jobId);
       setJobId(data.jobId);
       setStatus("waiting");
+      
+      // Refresh credits after using one
+      if (user?.uid) {
+        getUserCredits(user.uid).then((userCredits) => {
+          setCredits(userCredits.credits);
+          setIsUnlimited(userCredits.isUnlimited || false);
+        });
+      }
       
       // Immediately check status in case job already completed
       setTimeout(() => {
@@ -337,11 +389,59 @@ export default function GenerateVideoPage() {
             </div>
           </header>
 
+          {/* Authentication and Credits Status */}
+          {!authLoading && (
+            <div className="bg-white/5 border border-white/15 rounded-xl p-4 sm:p-6">
+              {user ? (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="text-sm sm:text-base text-white/80">
+                      Signed in as <span className="font-semibold text-white break-words">{userData?.displayName || user.email}</span>
+                    </div>
+                    {credits !== null && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/60 text-xs sm:text-sm">Credits:</span>
+                        {isUnlimited ? (
+                          <span className="font-bold text-emerald-400 text-sm sm:text-base">Unlimited</span>
+                        ) : (
+                          <span className={`font-bold text-sm sm:text-base ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {credits}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <p className="text-sm sm:text-base text-white/80">Sign in to generate videos</p>
+                  <Link
+                    href="/auth/login"
+                    className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg transition-all text-sm font-semibold text-center"
+                  >
+                    Sign In
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
           <section>
-            <form
-              onSubmit={handleSubmit}
-              className="bg-white/5 border border-white/15 rounded-2xl p-6 md:p-8 backdrop-blur-md"
-            >
+            {!user ? (
+              <div className="bg-white/5 border border-white/15 rounded-2xl p-6 sm:p-8 text-center">
+                <p className="text-sm sm:text-base text-white/80 mb-4">Please sign in to generate videos</p>
+                <Link
+                  href="/auth/login"
+                  className="inline-block px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg transition-all text-sm sm:text-base font-semibold"
+                >
+                  Sign In
+                </Link>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="bg-white/5 border border-white/15 rounded-2xl p-4 sm:p-6 md:p-8 backdrop-blur-md"
+              >
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-semibold mb-2">
@@ -374,16 +474,24 @@ export default function GenerateVideoPage() {
 
                   <button
                     type="submit"
-                    disabled={isBusy}
+                    disabled={isBusy || (credits !== null && credits <= 0 && !isUnlimited)}
                     className="mt-2 md:mt-7 inline-flex items-center justify-center bg-emerald-500 text-black px-8 py-3 rounded-full font-bold text-base shadow-xl hover:shadow-2xl hover:bg-emerald-400 hover:scale-105 transition-all disabled:opacity-60 disabled:hover:scale-100"
                   >
                     {status === "starting"
                       ? "Starting..."
                       : status === "waiting"
                       ? "Generating..."
+                      : credits !== null && credits <= 0 && !isUnlimited
+                      ? "No Credits"
                       : "Generate Video"}
                   </button>
                 </div>
+
+                {credits !== null && credits <= 0 && !isUnlimited && (
+                  <div className="rounded-xl bg-yellow-500/20 border border-yellow-400/60 text-sm px-4 py-3">
+                    You have no credits remaining. Please contact support to add more credits.
+                  </div>
+                )}
 
                 {errorMessage && (
                   <div className="rounded-xl bg-red-500/20 border border-red-400/60 text-sm px-4 py-3">
@@ -392,6 +500,7 @@ export default function GenerateVideoPage() {
                 )}
               </div>
             </form>
+            )}
           </section>
 
           {status === "waiting" && (
@@ -451,44 +560,44 @@ export default function GenerateVideoPage() {
             }
           }}
         >
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-y-auto border border-gray-700/50 relative shadow-2xl shadow-purple-500/20 animate-in zoom-in-95 duration-300">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-y-auto border border-gray-700/50 relative shadow-2xl shadow-purple-500/20 animate-in zoom-in-95 duration-300">
             {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-blue-600/3 to-teal-600/5 rounded-3xl pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-blue-600/3 to-teal-600/5 rounded-2xl sm:rounded-3xl pointer-events-none"></div>
             
             {/* Close Button */}
-            <div className="absolute top-6 right-6 z-50">
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50">
               <button
                 onClick={() => {
                   setShowExamples(false);
                   setSelectedVideo(null);
                 }}
-                className="w-12 h-12 bg-gray-800/80 hover:bg-gray-700/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:shadow-lg cursor-pointer"
+                className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-800/80 hover:bg-gray-700/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:shadow-lg cursor-pointer touch-manipulation"
                 aria-label="Close modal"
                 type="button"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-10 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            <div className="p-4 sm:p-6 md:p-10 relative z-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 sm:mb-8 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                 Generated Video Examples
               </h2>
 
               {loadingExamples ? (
-                <div className="flex items-center justify-center py-20">
+                <div className="flex items-center justify-center py-12 sm:py-20">
                   <div className="w-8 h-8 border-4 border-white/30 border-t-emerald-400 rounded-full animate-spin"></div>
                 </div>
               ) : exampleVideos.length === 0 ? (
-                <div className="text-center py-20 text-white/60">
-                  <p className="text-lg">No example videos yet.</p>
-                  <p className="text-sm mt-2">Generate your first video to see it here!</p>
+                <div className="text-center py-12 sm:py-20 text-white/60">
+                  <p className="text-base sm:text-lg">No example videos yet.</p>
+                  <p className="text-xs sm:text-sm mt-2">Generate your first video to see it here!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {exampleVideos.map((video) => (
                     <div
                       key={video.id}

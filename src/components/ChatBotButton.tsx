@@ -19,7 +19,7 @@ export default function ChatBotButton({ className = '', isChatOpen, setChatOpen 
       {!isChatOpen && (
         <button
           onClick={toggleChatBot}
-          className={`fixed right-4 sm:right-8 bottom-8 z-50 flex items-center gap-3 px-5 sm:px-6 py-4 sm:py-4 bg-gradient-to-r from-[#0a0a0a] to-[#1a1a1a] hover:from-[#1a1a1a] hover:to-[#2a2a2a] text-white font-semibold rounded-2xl shadow-2xl hover:shadow-gray-500/25 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-[#2a2a2a]/20 ${className}`}
+          className={`fixed right-2 sm:right-4 md:right-8 bottom-4 sm:bottom-8 z-50 flex items-center gap-2 sm:gap-3 px-3 sm:px-5 md:px-6 py-3 sm:py-4 bg-gradient-to-r from-[#0a0a0a] to-[#1a1a1a] hover:from-[#1a1a1a] hover:to-[#2a2a2a] text-white font-semibold rounded-2xl shadow-2xl hover:shadow-gray-500/25 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-[#2a2a2a]/20 max-w-[calc(100vw-1rem)] ${className}`}
           aria-label="Open chat bot"
         >
         {/* Chat Bot Icon */}
