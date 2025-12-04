@@ -252,7 +252,7 @@ export default function BlogPage(): React.JSX.Element {
         let finalImageUrls = existingImageUrls;
         
         // Update with existing images first (in case some were removed)
-        await updateBlogPost(editingPost.id, { images: finalImageUrls });
+        await updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid);
         
         // Upload new images if any (don't block update if this fails)
         if (selectedImages.length > 0) {
@@ -261,7 +261,7 @@ export default function BlogPage(): React.JSX.Element {
           uploadBlogImages(selectedImages, editingPost.id)
             .then((newImageUrls) => {
               finalImageUrls = [...existingImageUrls, ...newImageUrls];
-              return updateBlogPost(editingPost.id, { images: finalImageUrls });
+              return updateBlogPost(editingPost.id, { images: finalImageUrls }, user.uid);
             })
             .then(() => {
               // Reload posts to show updated post with images

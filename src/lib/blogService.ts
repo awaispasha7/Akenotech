@@ -44,8 +44,9 @@ export const saveBlogPost = async (post: Omit<BlogPost, 'id' | 'createdAt' | 'us
     
     return docRef.id;
   } catch (error: unknown) {
+    const firebaseError = error as { code?: string; message?: string };
     // Check if it's a permission error
-    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+    if (firebaseError?.code === 'permission-denied' || firebaseError?.message?.includes('permission')) {
       console.error('⚠️ Firebase Permission Error: Please update Firestore security rules in Firebase Console');
       console.error('Go to: Firebase Console → Firestore Database → Rules');
       console.error('Add this rule: allow read, write: if true; for blogPosts collection');
