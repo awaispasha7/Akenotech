@@ -67,39 +67,99 @@ function HomeContent() {
       <TechnologiesTools />
       <HighlightedUseCases />
 
-      {/* AI Video Generation CTA */}
-      <section className="bg-gradient-to-br from-[#050816] via-black to-slate-900 text-white border-y border-white/10">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16 md:py-20 grid gap-10 md:grid-cols-2 items-center">
-          <div className="space-y-4 md:space-y-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300/80">
-              New capability
-            </p>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">
-              Prototype AI video concepts in minutes, not weeks.
-            </h2>
-            <p className="text-sm md:text-base text-gray-300 max-w-xl">
-              Let your teams describe a scenario in natural language and instantly see it as a short video.
-              Ideal for pitching AI use cases, storytelling product flows, and validating motion concepts
-              without a production crew.
-            </p>
-          </div>
-          <div className="space-y-6 md:space-y-8">
-            <div className="bg-white/5 border border-white/15 rounded-2xl p-5 md:p-6 backdrop-blur-sm space-y-3">
-              <p className="text-sm font-semibold text-emerald-300/90">
-                What you get
-              </p>
-              <ul className="space-y-2 text-sm text-gray-200 list-disc list-inside">
-                <li>Short Sora-powered clips tailored to your prompts.</li>
-                <li>Configurable durations for quick explorations or deeper dives.</li>
-                <li>Ready-to-share links you can drop into decks or send to stakeholders.</li>
-              </ul>
+      {/* AI Video Generation CTA - Prominent Section */}
+      <section className="relative bg-gradient-to-br from-emerald-900/30 via-[#050816] to-purple-900/30 text-white border-y-2 border-emerald-500/30 overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-28">
+          {/* Badge */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/50 rounded-full px-4 py-2 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                What&apos;s New
+              </span>
             </div>
-            <Link
-              href="/generate-video"
-              className="inline-flex items-center justify-center bg-emerald-500 text-black px-8 py-3 rounded-full font-semibold text-base shadow-xl hover:shadow-2xl hover:bg-emerald-400 hover:scale-105 transition-all"
-            >
-              Generate a video now
-            </Link>
+          </div>
+
+          <div className="grid gap-12 md:grid-cols-2 items-center">
+            <div className="space-y-6 md:space-y-8">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                Try Our New{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                  AI Video Generation
+                </span>{' '}
+                Module
+              </h2>
+              <p className="text-lg md:text-xl text-gray-300 max-w-xl leading-relaxed">
+                Transform your ideas into stunning videos in seconds. Powered by OpenAI&apos;s Sora 2, 
+                our video generation tool lets you create professional-quality clips from simple text prompts.
+              </p>
+              
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/generate-video"
+                  className="group inline-flex items-center justify-center bg-emerald-500 text-black px-8 py-4 rounded-full font-bold text-base shadow-2xl hover:shadow-emerald-500/50 hover:bg-emerald-400 hover:scale-105 transition-all"
+                >
+                  Generate Video Now
+                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/generate-video"
+                  className="inline-flex items-center justify-center border-2 border-emerald-400/50 text-emerald-300 px-6 py-4 rounded-full font-semibold text-sm hover:bg-emerald-400/10 hover:border-emerald-400 transition-all"
+                >
+                  Learn More
+                </Link>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="bg-white/5 border border-white/20 rounded-2xl p-6 md:p-8 backdrop-blur-md space-y-4 shadow-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-semibold text-white">
+                    How It Works
+                  </p>
+                </div>
+                <ul className="space-y-3 text-sm md:text-base text-gray-200">
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-400 mt-1">✓</span>
+                    <span>Write a detailed prompt describing your video scene</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-400 mt-1">✓</span>
+                    <span>Select duration (5-20 seconds) and submit</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-400 mt-1">✓</span>
+                    <span>Watch your video generate in real-time</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-400 mt-1">✓</span>
+                    <span>Download or share your generated video instantly</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-gradient-to-r from-emerald-500/10 to-purple-500/10 border border-emerald-400/30 rounded-xl p-4 text-center">
+                <p className="text-sm text-emerald-300 font-semibold">
+                  🎬 Powered by OpenAI Sora 2 · Beta Access Available Now
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
