@@ -14,7 +14,7 @@ module.exports = {
       keyframes: {
         scroll: {
           '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(calc(-100% / 4 * 3.99))' },
+          '100%': { transform: 'translateX(calc(-100% / 3 - 32px))' },
         },
       },
       animation: {
