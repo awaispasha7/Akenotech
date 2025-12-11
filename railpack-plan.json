@@ -1,0 +1,25 @@
+{
+  "providers": {
+    "node": {
+      "version": "22.21.1"
+    }
+  },
+  "phases": {
+    "install": {
+      "commands": [
+        "corepack enable",
+        "corepack prepare pnpm@latest --activate",
+        "pnpm install --frozen-lockfile --prefer-offline"
+      ]
+    },
+    "build": {
+      "commands": [
+        "pnpm run build"
+      ]
+    }
+  },
+  "start": {
+    "command": "pnpm run start"
+  }
+}
+
