@@ -11,6 +11,7 @@ import AboutUs from './components/AboutUs';
 import AreasOfExpertise from './components/AreasOfExpertise';
 import TechnologiesTools from './components/TechnologiesTools';
 import HighlightedUseCases from './components/HighlightedUseCases';
+import FootballAnalysisDemo from './components/FootballAnalysisDemo';
 import CallToAction from './components/CallToAction';
 import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
@@ -68,8 +69,11 @@ function HomeContent() {
       <TechnologiesTools />
       <HighlightedUseCases />
 
+      {/* Football Analysis Demo Section */}
+      <FootballAnalysisDemo />
+
       {/* AI Video Generation CTA - Prominent Section */}
-      <section id="video-generation" className="relative bg-gradient-to-br from-emerald-900/30 via-[#050816] to-purple-900/30 text-white border-y-2 border-emerald-500/30 overflow-hidden">
+      <section id="video-generation" className="relative bg-gradient-to-br from-emerald-900/30 via-[#050816] to-purple-900/30 text-white border-y-2 border-emerald-500/30 overflow-hidden mt-20 md:mt-24">
         {/* Animated background elements */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
