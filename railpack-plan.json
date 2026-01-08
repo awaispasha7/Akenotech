@@ -14,7 +14,7 @@
     },
     "build": {
       "commands": [
-        "pnpm run build"
+        "bash -c 'export NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000} && export NEXT_PUBLIC_FOOTBALL_API_URL=${NEXT_PUBLIC_FOOTBALL_API_URL:-${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}} && pnpm run build'"
       ]
     }
   },
