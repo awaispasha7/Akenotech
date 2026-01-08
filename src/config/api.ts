@@ -4,10 +4,10 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-// Football Analysis API URL - uses localhost for development, production URL for deployment
-// Can be overridden with NEXT_PUBLIC_FOOTBALL_API_URL for separate backend
-// Falls back to API_BASE_URL if not set, then to localhost
-export const FOOTBALL_API_URL = process.env.NEXT_PUBLIC_FOOTBALL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// Football Analysis API URL - uses same backend as main API by default
+// Use NEXT_PUBLIC_API_BASE_URL for both to reduce Railway secret validation requirements
+// If you need a separate football API backend, set NEXT_PUBLIC_API_BASE_URL to point to it
+export const FOOTBALL_API_URL = API_BASE_URL;
 
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE_URL}/chat`,
