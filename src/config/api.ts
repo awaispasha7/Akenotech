@@ -1,11 +1,11 @@
 // API Configuration
 // Uses env when provided, otherwise falls back to your local Akeno Tech backend
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://web-production-ae7a.up.railway.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-// Football Analysis API URL - uses production backend URL
+// Football Analysis API URL - uses localhost for development, production URL for deployment
 // Can be overridden with NEXT_PUBLIC_FOOTBALL_API_URL for separate backend
-export const FOOTBALL_API_URL = process.env.NEXT_PUBLIC_FOOTBALL_API_URL || 'https://web-production-ae7a.up.railway.app';
+export const FOOTBALL_API_URL = process.env.NEXT_PUBLIC_FOOTBALL_API_URL || 'http://localhost:8000';
 
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE_URL}/chat`,
