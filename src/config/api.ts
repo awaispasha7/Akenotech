@@ -15,7 +15,6 @@ export const API_ENDPOINTS = {
   CONSULTATION_SCHEDULE: `${API_BASE_URL}/consultation/schedule`,
   // Football Analysis endpoints
   FOOTBALL_UPLOAD: `${FOOTBALL_API_URL}/api/videos/upload`,
-  FOOTBALL_YOUTUBE: `${FOOTBALL_API_URL}/api/videos/youtube`,
   FOOTBALL_JOB_STATUS: (jobId: string) => `${FOOTBALL_API_URL}/api/jobs/${jobId}`,
   FOOTBALL_RESULT: (jobId: string) => `${FOOTBALL_API_URL}/api/results/${jobId}.mp4`,
 } as const;

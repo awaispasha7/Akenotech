@@ -76,7 +76,7 @@ export default function FootballAnalysisPage() {
                     </h1>
 
                     <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        Paste a YouTube video URL or upload a football match video and our AI will automatically detect and track
+                        Upload a football match video and our AI will automatically detect and track
                         players and the ball in real-time using advanced YOLO technology.
                     </p>
 
@@ -135,7 +135,7 @@ export default function FootballAnalysisPage() {
                                 <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
                                     <span className="text-emerald-400 font-bold">1</span>
                                 </div>
-                                <p className="text-gray-400">Paste YouTube URL or upload video</p>
+                                <p className="text-gray-400">Upload your football video</p>
                             </div>
                             <div className="p-4 rounded-lg bg-white/5">
                                 <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
