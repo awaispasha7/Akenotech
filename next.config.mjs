@@ -11,12 +11,9 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  // Explicitly define environment variables for Next.js
-  // These will be embedded at build time, but defaults are provided in api.ts
-  env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
-    NEXT_PUBLIC_FOOTBALL_API_URL: process.env.NEXT_PUBLIC_FOOTBALL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
-  },
+  // Don't explicitly define env here - let Next.js use process.env directly
+  // This avoids Railway's secret validation checking for these variables
+  // Defaults are handled in src/config/api.ts
 };
 
 export default nextConfig;
