@@ -124,10 +124,10 @@ export default function VideoUploader({
             return;
         }
 
-        // Basic YouTube URL validation
-        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+        // Improved YouTube URL validation - matches all formats including Shorts
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|v\/)|youtu\.be\/|m\.youtube\.com\/(watch\?v=|shorts\/))[a-zA-Z0-9_-]{11}/;
         if (!youtubeRegex.test(youtubeUrl.trim())) {
-            onError('Please enter a valid YouTube URL');
+            onError('Please enter a valid YouTube URL (supports regular videos and Shorts)');
             return;
         }
 
