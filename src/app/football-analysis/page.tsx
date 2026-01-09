@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
@@ -10,6 +10,7 @@ import ProcessingStatus from '@/components/football/ProcessingStatus';
 import VideoPlayer from '@/components/football/VideoPlayer';
 import ErrorDisplay from '@/components/football/ErrorDisplay';
 import { useAuth } from "@/components/AuthProvider";
+import { getUserCredits } from "@/lib/creditService";
 
 type AppState = 'upload' | 'processing' | 'result' | 'error';
 
@@ -20,16 +21,47 @@ export default function FootballAnalysisPage() {
     const [jobId, setJobId] = useState<string | null>(null);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [credits, setCredits] = useState<number | null>(null);
+    const [isUnlimited, setIsUnlimited] = useState(false);
+
+    // Load user credits
+    useEffect(() => {
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        } else {
+            setCredits(null);
+            setIsUnlimited(false);
+        }
+    }, [user]);
 
     const handleUploadComplete = (newJobId: string) => {
         setJobId(newJobId);
         setAppState('processing');
         setError(null);
+        
+        // Refresh credits after using one
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        }
     };
 
     const handleError = (errorMessage: string) => {
         setError(errorMessage);
         setAppState('error');
+        
+        // Refresh credits on error (in case credit was used but upload failed)
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        }
     };
 
     const handleProcessingComplete = (url: string) => {
@@ -119,15 +151,29 @@ export default function FootballAnalysisPage() {
                         </div>
                     </header>
 
-                    {/* Enhanced Authentication Status */}
+                    {/* Enhanced Authentication and Credits Status */}
                     {!authLoading && (
                         <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 
                             border border-emerald-400/30 rounded-2xl p-4 sm:p-6 backdrop-blur-md
                             shadow-xl shadow-emerald-500/10">
                             {user ? (
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                                    <div className="text-sm sm:text-base text-white/90">
-                                        Signed in as <span className="font-semibold text-emerald-300 break-words">{userData?.displayName || user.email}</span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                        <div className="text-sm sm:text-base text-white/90">
+                                            Signed in as <span className="font-semibold text-emerald-300 break-words">{userData?.displayName || user.email}</span>
+                                        </div>
+                                        {credits !== null && (
+                                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-emerald-400/20">
+                                                <span className="text-white/70 text-xs sm:text-sm">Credits:</span>
+                                                {isUnlimited ? (
+                                                    <span className="font-bold text-emerald-400 text-sm sm:text-base animate-pulse">Unlimited</span>
+                                                ) : (
+                                                    <span className={`font-bold text-sm sm:text-base ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                        {credits}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : (

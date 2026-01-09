@@ -110,7 +110,7 @@ export default function BlogPage(): React.JSX.Element {
   const handlePublishPost = async () => {
     // Check authentication
     if (!user || !user.uid) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=/blog');
       return;
     }
 
@@ -230,7 +230,7 @@ export default function BlogPage(): React.JSX.Element {
   const handleUpdatePost = async () => {
     // Check authentication
     if (!user || !user.uid) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=/blog');
       return;
     }
 
@@ -308,7 +308,7 @@ export default function BlogPage(): React.JSX.Element {
   const handleDeletePost = async (postId: string) => {
     // Check authentication
     if (!user || !user.uid) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=/blog');
       return;
     }
 
@@ -1523,7 +1523,7 @@ export default function BlogPage(): React.JSX.Element {
                   <span className="text-sm sm:text-base text-gray-400 text-center sm:text-left">Sign in to create and manage posts</span>
                   <div className="flex gap-3 w-full sm:w-auto">
                     <Link
-                      href="/auth/login"
+                      href="/auth/login?returnUrl=/blog"
                       className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg transition-all text-sm font-semibold text-center min-h-[44px] touch-manipulation"
                     >
                       Sign In

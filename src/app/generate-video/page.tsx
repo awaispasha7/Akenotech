@@ -220,7 +220,7 @@ export default function GenerateVideoPage() {
 
     // Check authentication
     if (!user || !user.uid) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=/generate-video');
       return;
     }
 
@@ -257,7 +257,7 @@ export default function GenerateVideoPage() {
         
         // Handle authentication/authorization errors
         if (res.status === 401) {
-          router.push('/auth/login');
+          router.push('/auth/login?returnUrl=/generate-video');
           return;
         }
         
@@ -416,7 +416,7 @@ export default function GenerateVideoPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                   <p className="text-sm sm:text-base text-white/80">Sign in to generate videos</p>
                   <Link
-                    href="/auth/login"
+                    href="/auth/login?returnUrl=/generate-video"
                     className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg transition-all text-sm font-semibold text-center"
                   >
                     Sign In

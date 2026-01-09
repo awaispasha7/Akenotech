@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasCredits, useCredit } from "@/lib/creditServiceAdmin";
 import { getAdminDb } from "@/lib/firebaseAdmin";
 
 export async function POST(req: NextRequest) {
@@ -24,10 +25,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if user has credits
+    const hasCredit = await hasCredits(userId);
+    if (!hasCredit) {
+      return NextResponse.json(
+        { error: "You have no credits remaining. Please contact support to add more credits." },
+        { status: 403 }
+      );
+    }
+
     if (!file) {
       return NextResponse.json(
         { error: "No file provided." },
         { status: 400 }
+      );
+    }
+
+    // Use a credit before processing
+    const creditUsed = await useCredit(userId);
+    if (!creditUsed) {
+      return NextResponse.json(
+        { error: "Failed to use credit. Please try again." },
+        { status: 500 }
       );
     }
 
