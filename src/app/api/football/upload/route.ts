@@ -72,10 +72,15 @@ export async function POST(req: NextRequest) {
     console.log(`[Football Upload] Upload endpoint: ${uploadEndpoint}`);
     console.log(`[Football Upload] Forwarding file to backend: ${file.name}, size: ${file.size} bytes`);
 
+    // Check if backend URL is accessible
+    if (!backendUrl || backendUrl === 'http://localhost:8000') {
+      console.warn('[Football Upload] WARNING: Backend URL not configured, using default localhost');
+    }
+
     const backendFormData = new FormData();
     
-    // Use file directly - Node.js 18+ fetch should handle File objects from FormData
-    // The File object from Next.js FormData should be compatible
+    // Use file directly - File objects from Next.js FormData should work with fetch
+    // Avoid arrayBuffer() as it loads entire file into memory, causing HTTP/2 protocol errors
     backendFormData.append('file', file, file.name);
 
     // Create AbortController for timeout handling
@@ -87,10 +92,14 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         body: backendFormData,
         signal: controller.signal,
-        // Add headers to help with debugging
+        // Force HTTP/1.1 to avoid HTTP/2 protocol errors with large files
+        // HTTP/2 can have issues with large request bodies
         headers: {
           'Accept': 'application/json',
+          'Connection': 'keep-alive',
         },
+        // @ts-ignore - Node.js fetch supports this
+        keepalive: true,
       });
 
       clearTimeout(timeoutId);
