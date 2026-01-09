@@ -11,12 +11,16 @@ export async function POST(req: NextRequest) {
   try {
     console.log('[Football Upload] Received request');
     
+    // Parse form data - this might load large files into memory
+    // but it's necessary to extract userId for auth checks
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const userId = formData.get('userId') as string;
 
     console.log('[Football Upload] File received:', file ? { name: file.name, size: file.size, type: file.type } : 'null');
     console.log('[Football Upload] UserId:', userId);
+    
+    // Early validation before processing file
 
     // Check authentication
     if (!userId || typeof userId !== "string") {
@@ -64,11 +68,9 @@ export async function POST(req: NextRequest) {
     const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
     const backendFormData = new FormData();
     
-    // Convert File to Blob for proper forwarding
-    // Read file as array buffer to ensure proper streaming
-    const fileBuffer = await file.arrayBuffer();
-    const fileBlob = new Blob([fileBuffer], { type: file.type });
-    backendFormData.append('file', fileBlob, file.name);
+    // Use file directly - Node.js 18+ fetch should handle File objects from FormData
+    // The File object from Next.js FormData should be compatible
+    backendFormData.append('file', file, file.name);
 
     console.log(`[Football Upload] Forwarding file to backend: ${file.name}, size: ${file.size} bytes`);
 
