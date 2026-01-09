@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface VideoUploaderProps {
     onUploadComplete: (jobId: string) => void;
@@ -64,9 +65,13 @@ export default function VideoUploader({
         setUploadProgress(0);
 
         try {
+            // Upload directly to Python backend to avoid Next.js HTTP/2 protocol errors
+            // This matches the old UI behavior that was working
+            const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+            const uploadUrl = `${backendUrl}/api/videos/upload`;
+
             const formData = new FormData();
             formData.append('file', selectedFile);
-            formData.append('userId', userId);
 
             const xhr = new XMLHttpRequest();
 
@@ -108,7 +113,7 @@ export default function VideoUploader({
                 xhr.onerror = () => reject(new Error('Network error during upload'));
                 xhr.ontimeout = () => reject(new Error('Upload timeout - the file may be too large'));
                 xhr.timeout = 300000; // 5 minute timeout for large files
-                xhr.open('POST', '/api/football/upload');
+                xhr.open('POST', uploadUrl);
                 xhr.send(formData);
             });
 
