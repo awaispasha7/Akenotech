@@ -142,14 +142,16 @@ export default function VideoUploader({
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-            {/* File Upload Dropzone */}
+            {/* Enhanced File Upload Dropzone */}
             <div
                 {...getRootProps()}
                 className={`
                     relative p-12 rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer
+                    bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-emerald-500/5
+                    backdrop-blur-sm
                     ${isDragActive
-                        ? 'border-emerald-400 bg-emerald-500/10 scale-[1.02]'
-                        : 'border-gray-600 hover:border-emerald-500 hover:bg-white/5'
+                        ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/20 via-teal-500/20 to-emerald-500/20 scale-[1.02] shadow-2xl shadow-emerald-500/30'
+                        : 'border-emerald-400/40 hover:border-emerald-400 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:via-teal-500/10 hover:to-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/20'
                     }
                     ${(isUploading || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -157,58 +159,72 @@ export default function VideoUploader({
                 <input {...getInputProps()} />
 
                 <div className="flex flex-col items-center justify-center space-y-6">
-                    <div className={`
-                        w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300
-                        ${isDragActive ? 'bg-emerald-500/20 scale-110' : 'bg-gray-700/50'}
-                    `}>
-                        <svg
-                            className={`w-12 h-12 ${isDragActive ? 'text-emerald-400' : 'text-gray-400'}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                            />
-                        </svg>
+                    <div className="relative">
+                        {isDragActive && (
+                            <div className="absolute inset-0 bg-emerald-500/30 blur-2xl rounded-full animate-pulse"></div>
+                        )}
+                        <div className={`
+                            relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300
+                            ${isDragActive 
+                                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 scale-110 shadow-2xl shadow-emerald-500/50' 
+                                : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-400/30'
+                            }
+                        `}>
+                            <svg
+                                className={`w-12 h-12 ${isDragActive ? 'text-white' : 'text-emerald-400'}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                />
+                            </svg>
+                        </div>
                     </div>
 
-                    <div className="text-center">
-                        <p className="text-xl font-semibold text-gray-200 mb-2">
+                    <div className="text-center space-y-2">
+                        <p className={`text-xl md:text-2xl font-bold mb-2 transition-colors ${
+                            isDragActive 
+                                ? 'text-emerald-300' 
+                                : 'bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent'
+                        }`}>
                             {isDragActive
                                 ? 'Drop your video here...'
                                 : 'Upload Football Match Video'
                             }
                         </p>
-                        <p className="text-sm text-gray-400 mb-1">
+                        <p className="text-sm md:text-base text-white/70 mb-1">
                             Drag & drop your video file or click to browse
                         </p>
-                        <p className="text-xs text-gray-500 mt-3">
-                            Supported formats: {ALLOWED_TYPES.join(', ')} • Max {MAX_SIZE_MB}MB • Max 5 minutes
+                        <p className="text-xs md:text-sm text-white/50 mt-3 px-4 py-2 rounded-lg bg-black/30 border border-emerald-400/20 inline-block">
+                            📹 Supported: {ALLOWED_TYPES.join(', ')} • Max {MAX_SIZE_MB}MB • Max 5 minutes
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Selected File Preview */}
+            {/* Enhanced Selected File Preview */}
             {selectedFile && !isUploading && !isProcessing && (
-                <div className="mt-6 p-6 glass rounded-xl border border-gray-600">
+                <div className="mt-6 p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-500/10 
+                    border border-emerald-400/30 backdrop-blur-md shadow-xl shadow-emerald-500/10">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
-                            <div className="w-14 h-14 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                                <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500/30 to-teal-500/30 
+                                border border-emerald-400/50 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                <svg className="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                             </div>
 
                             <div>
-                                <p className="text-gray-200 font-medium truncate max-w-xs">
+                                <p className="text-white font-semibold truncate max-w-xs">
                                     {selectedFile.name}
                                 </p>
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-emerald-300/80 font-medium">
                                     {formatFileSize(selectedFile.size)}
                                 </p>
                             </div>
@@ -216,7 +232,8 @@ export default function VideoUploader({
 
                         <button
                             onClick={handleRemoveFile}
-                            className="p-2 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
+                            className="p-2 rounded-lg hover:bg-red-500/20 text-white/60 hover:text-red-400 transition-colors
+                                border border-transparent hover:border-red-400/30"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -226,32 +243,39 @@ export default function VideoUploader({
 
                     <button
                         onClick={handleFileUpload}
-                        className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 
-                            hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold 
+                        className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 
+                            hover:from-emerald-400 hover:via-emerald-300 hover:to-teal-400 text-black font-bold text-base
                             transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                            shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                            shadow-xl shadow-emerald-500/40 hover:shadow-emerald-500/60"
                     >
                         <span className="flex items-center justify-center space-x-2">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Process Video</span>
+                            <span>Analyze Video Now →</span>
                         </span>
                     </button>
                 </div>
             )}
 
-            {/* Upload Progress */}
+            {/* Enhanced Upload Progress */}
             {isUploading && (
-                <div className="mt-6 p-6 glass rounded-xl border border-gray-600">
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-gray-300 font-medium">Uploading video...</span>
-                        <span className="text-emerald-400 font-semibold">{uploadProgress}%</span>
+                <div className="mt-6 p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-emerald-500/10 
+                    border border-emerald-400/30 backdrop-blur-md shadow-xl shadow-emerald-500/10">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-white font-semibold flex items-center gap-2">
+                            <svg className="w-5 h-5 text-emerald-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Uploading video...
+                        </span>
+                        <span className="text-emerald-400 font-bold text-lg">{uploadProgress}%</span>
                     </div>
-                    <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-full h-4 bg-black/40 rounded-full overflow-hidden border border-emerald-400/20">
                         <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300"
+                            className="h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500 transition-all duration-300 
+                                shadow-lg shadow-emerald-500/50"
                             style={{ width: `${uploadProgress}%` }}
                         />
                     </div>
