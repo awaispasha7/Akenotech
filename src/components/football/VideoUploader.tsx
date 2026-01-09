@@ -2,12 +2,12 @@
 
 import React, { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { API_ENDPOINTS } from '@/config/api';
 
 interface VideoUploaderProps {
     onUploadComplete: (jobId: string) => void;
     onError: (error: string) => void;
     isProcessing: boolean;
+    userId: string | null;
 }
 
 const ALLOWED_TYPES = ['.mp4', '.avi', '.mov', '.mkv', '.webm'];
@@ -16,7 +16,8 @@ const MAX_SIZE_MB = 500;
 export default function VideoUploader({
     onUploadComplete,
     onError,
-    isProcessing
+    isProcessing,
+    userId
 }: VideoUploaderProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -53,12 +54,19 @@ export default function VideoUploader({
     const handleFileUpload = async () => {
         if (!selectedFile) return;
 
+        // Check authentication
+        if (!userId) {
+            onError('Please sign in to upload videos');
+            return;
+        }
+
         setIsUploading(true);
         setUploadProgress(0);
 
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
+            formData.append('userId', userId);
 
             const xhr = new XMLHttpRequest();
 
@@ -100,13 +108,21 @@ export default function VideoUploader({
                 xhr.onerror = () => reject(new Error('Network error during upload'));
                 xhr.ontimeout = () => reject(new Error('Upload timeout - the file may be too large'));
                 xhr.timeout = 300000; // 5 minute timeout for large files
-                xhr.open('POST', API_ENDPOINTS.FOOTBALL_UPLOAD);
+                xhr.open('POST', '/api/football/upload');
                 xhr.send(formData);
             });
 
             onUploadComplete(response.job_id);
         } catch (error: any) {
-            onError(error.message || 'Upload failed');
+            // Handle authentication and credit errors
+            const errorMessage = error.message || 'Upload failed';
+            if (errorMessage.includes('401') || errorMessage.includes('Authentication')) {
+                onError('Please sign in to upload videos');
+            } else if (errorMessage.includes('403') || errorMessage.includes('credits')) {
+                onError(errorMessage);
+            } else {
+                onError(errorMessage);
+            }
         } finally {
             setIsUploading(false);
             setUploadProgress(0);

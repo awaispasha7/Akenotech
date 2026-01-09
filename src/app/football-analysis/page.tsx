@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -8,24 +9,59 @@ import VideoUploader from '@/components/football/VideoUploader';
 import ProcessingStatus from '@/components/football/ProcessingStatus';
 import VideoPlayer from '@/components/football/VideoPlayer';
 import ErrorDisplay from '@/components/football/ErrorDisplay';
+import { useAuth } from "@/components/AuthProvider";
+import { getUserCredits } from "@/lib/creditService";
 
 type AppState = 'upload' | 'processing' | 'result' | 'error';
 
 export default function FootballAnalysisPage() {
+    const router = useRouter();
+    const { user, userData, loading: authLoading } = useAuth();
     const [appState, setAppState] = useState<AppState>('upload');
     const [jobId, setJobId] = useState<string | null>(null);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [credits, setCredits] = useState<number | null>(null);
+    const [isUnlimited, setIsUnlimited] = useState(false);
+
+    // Load user credits
+    useEffect(() => {
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        } else {
+            setCredits(null);
+            setIsUnlimited(false);
+        }
+    }, [user]);
 
     const handleUploadComplete = (newJobId: string) => {
         setJobId(newJobId);
         setAppState('processing');
         setError(null);
+        
+        // Refresh credits after using one
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        }
     };
 
     const handleError = (errorMessage: string) => {
         setError(errorMessage);
         setAppState('error');
+        
+        // Refresh credits on error (in case credit was used but upload failed)
+        if (user?.uid) {
+            getUserCredits(user.uid).then((userCredits) => {
+                setCredits(userCredits.credits);
+                setIsUnlimited(userCredits.isUnlimited || false);
+            });
+        }
     };
 
     const handleProcessingComplete = (url: string) => {
@@ -93,6 +129,43 @@ export default function FootballAnalysisPage() {
                     </div>
                 </header>
 
+                {/* Authentication and Credits Status */}
+                {!authLoading && (
+                    <div className="max-w-4xl mx-auto mb-8 bg-white/5 border border-white/15 rounded-xl p-4 sm:p-6">
+                        {user ? (
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                    <div className="text-sm sm:text-base text-white/80">
+                                        Signed in as <span className="font-semibold text-white break-words">{userData?.displayName || user.email}</span>
+                                    </div>
+                                    {credits !== null && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-white/60 text-xs sm:text-sm">Credits:</span>
+                                            {isUnlimited ? (
+                                                <span className="font-bold text-emerald-400 text-sm sm:text-base">Unlimited</span>
+                                            ) : (
+                                                <span className={`font-bold text-sm sm:text-base ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                    {credits}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                                <p className="text-sm sm:text-base text-white/80">Sign in to analyze football videos</p>
+                                <Link
+                                    href="/auth/login"
+                                    className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-lg transition-all text-sm font-semibold text-center"
+                                >
+                                    Sign In
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Main Content Area */}
                 <div className="max-w-4xl mx-auto">
                     {appState === 'upload' && (
@@ -100,6 +173,7 @@ export default function FootballAnalysisPage() {
                             onUploadComplete={handleUploadComplete}
                             onError={handleError}
                             isProcessing={false}
+                            userId={user?.uid || null}
                         />
                     )}
 
