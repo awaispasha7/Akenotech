@@ -202,6 +202,8 @@ export default function FootballAnalysisPage() {
                                         onError={handleError}
                                         isProcessing={false}
                                         userId={user.uid}
+                                        credits={credits}
+                                        isUnlimited={isUnlimited}
                                     />
                                 )}
 
