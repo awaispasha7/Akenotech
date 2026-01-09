@@ -157,6 +157,13 @@ export default function VideoUploader({
 
     return (
         <div className="w-full max-w-2xl mx-auto">
+            {/* Credit Warning Message - Show before upload */}
+            {credits !== null && credits <= 0 && !isUnlimited && (
+                <div className="mb-6 p-4 rounded-xl bg-yellow-500/20 border border-yellow-400/60 text-yellow-300 text-sm">
+                    You have no credits remaining. Please contact support to add more credits.
+                </div>
+            )}
+
             {/* Enhanced File Upload Dropzone */}
             <div
                 {...getRootProps()}
@@ -168,7 +175,7 @@ export default function VideoUploader({
                         ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/20 via-teal-500/20 to-emerald-500/20 scale-[1.02] shadow-2xl shadow-emerald-500/30'
                         : 'border-emerald-400/40 hover:border-emerald-400 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:via-teal-500/10 hover:to-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/20'
                     }
-                    ${(isUploading || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${(isUploading || isProcessing || (credits !== null && credits <= 0 && !isUnlimited)) ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
             >
                 <input {...getInputProps()} />
