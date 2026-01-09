@@ -75,8 +75,24 @@ export default function VideoUploader({
         setUploadProgress(0);
 
         try {
-            // Upload directly to Python backend to avoid Next.js HTTP/2 protocol errors
-            // This matches the old UI behavior that was working
+            // First, deduct credit via Next.js API (lightweight check and deduction)
+            const creditDeductionResponse = await fetch('/api/football/deduct-credit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId }),
+            });
+
+            if (!creditDeductionResponse.ok) {
+                const errorData = await creditDeductionResponse.json().catch(() => ({ error: 'Credit deduction failed' }));
+                setIsUploading(false);
+                onError(errorData.error || 'Failed to deduct credit. Please try again.');
+                return;
+            }
+
+            // If credit deduction succeeds, upload directly to Python backend
+            // This avoids Next.js HTTP/2 protocol errors with large files
             const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
             const uploadUrl = `${backendUrl}/api/videos/upload`;
 
