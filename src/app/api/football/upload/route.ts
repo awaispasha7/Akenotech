@@ -66,31 +66,72 @@ export async function POST(req: NextRequest) {
 
     // Forward to Python backend
     const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const uploadEndpoint = `${backendUrl}/api/videos/upload`;
+    
+    console.log(`[Football Upload] Backend URL: ${backendUrl}`);
+    console.log(`[Football Upload] Upload endpoint: ${uploadEndpoint}`);
+    console.log(`[Football Upload] Forwarding file to backend: ${file.name}, size: ${file.size} bytes`);
+
     const backendFormData = new FormData();
     
     // Use file directly - Node.js 18+ fetch should handle File objects from FormData
     // The File object from Next.js FormData should be compatible
     backendFormData.append('file', file, file.name);
 
-    console.log(`[Football Upload] Forwarding file to backend: ${file.name}, size: ${file.size} bytes`);
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for upload
 
-    const backendRes = await fetch(`${backendUrl}/api/videos/upload`, {
-      method: 'POST',
-      body: backendFormData,
-      // Don't set timeout here - let the backend handle it
-      // The timeout is handled by the XMLHttpRequest on the frontend
-    });
+    try {
+      const backendRes = await fetch(uploadEndpoint, {
+        method: 'POST',
+        body: backendFormData,
+        signal: controller.signal,
+        // Add headers to help with debugging
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
-    if (!backendRes.ok) {
-      const error = await backendRes.json().catch(() => ({ detail: 'Backend error' }));
-      return NextResponse.json(
-        { error: error.detail || error.error || 'Upload failed' },
-        { status: backendRes.status }
-      );
+      clearTimeout(timeoutId);
+
+      console.log(`[Football Upload] Backend response status: ${backendRes.status}`);
+
+      if (!backendRes.ok) {
+        let errorDetail = 'Backend error';
+        try {
+          const errorData = await backendRes.json();
+          errorDetail = errorData.detail || errorData.error || errorDetail;
+          console.error(`[Football Upload] Backend error:`, errorData);
+        } catch (parseError) {
+          const errorText = await backendRes.text().catch(() => 'Unknown error');
+          console.error(`[Football Upload] Backend error (non-JSON):`, errorText);
+          errorDetail = errorText || errorDetail;
+        }
+        
+        return NextResponse.json(
+          { error: errorDetail || 'Upload failed' },
+          { status: backendRes.status }
+        );
+      }
+
+      const result = await backendRes.json();
+      console.log(`[Football Upload] Upload successful, job_id: ${result.job_id}`);
+      return NextResponse.json(result);
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      console.error(`[Football Upload] Fetch error:`, fetchError);
+      
+      if (fetchError.name === 'AbortError') {
+        return NextResponse.json(
+          { error: "Upload timeout. The file may be too large or the server is taking too long to respond." },
+          { status: 504 }
+        );
+      }
+      
+      // Re-throw to be caught by outer catch block
+      throw fetchError;
     }
-
-    const result = await backendRes.json();
-    return NextResponse.json(result);
   } catch (err) {
     console.error("Error in /api/football/upload:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -103,9 +144,13 @@ export async function POST(req: NextRequest) {
           { status: 504 }
         );
       }
-      if (errorMessage.includes('ECONNRESET') || errorMessage.includes('connection reset')) {
+      if (errorMessage.includes('ECONNRESET') || errorMessage.includes('connection reset') || 
+          errorMessage.includes('ECONNREFUSED') || errorMessage.includes('fetch failed')) {
         return NextResponse.json(
-          { error: "Connection was reset. Please try again with a smaller file or check your internet connection." },
+          { 
+            error: "Cannot connect to backend server. Please check if the backend is running and accessible.",
+            details: process.env.NODE_ENV === 'development' ? `Backend URL: ${process.env.NEXT_PUBLIC_API_BASE_URL || 'not set'}` : undefined
+          },
           { status: 502 }
         );
       }
