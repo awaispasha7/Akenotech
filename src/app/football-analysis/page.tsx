@@ -11,6 +11,8 @@ import VideoPlayer from '@/components/football/VideoPlayer';
 import ErrorDisplay from '@/components/football/ErrorDisplay';
 import { useAuth } from "@/components/AuthProvider";
 import { getUserCredits } from "@/lib/creditService";
+import { sendVideoReadyEmail } from "@/lib/emailService";
+import { API_ENDPOINTS } from "@/config/api";
 
 type AppState = 'upload' | 'processing' | 'result' | 'error';
 
@@ -67,6 +69,31 @@ export default function FootballAnalysisPage() {
     const handleProcessingComplete = (url: string) => {
         setResultUrl(url);
         setAppState('result');
+        
+        // Send email notification when video processing completes (non-blocking)
+        if (user && userData && jobId) {
+            // Get user's email and display name
+            const userEmail = user.email || '';
+            const userName = userData.displayName || user.email?.split('@')[0] || 'User';
+            
+            // Ensure we have a full URL for the video
+            let fullVideoUrl = url;
+            if (!fullVideoUrl.startsWith('http')) {
+                // If URL is relative, construct full URL
+                fullVideoUrl = API_ENDPOINTS.FOOTBALL_RESULT(jobId);
+            }
+            
+            // Send email in background (don't wait for it - non-blocking)
+            sendVideoReadyEmail({
+                userEmail: userEmail,
+                userName: userName,
+                videoUrl: fullVideoUrl,
+                jobId: jobId
+            }).catch((error) => {
+                // Silently handle email errors - don't show to user or block UI
+                console.error('Email notification error:', error);
+            });
+        }
     };
 
     const handleReset = () => {
