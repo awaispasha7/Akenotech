@@ -67,6 +67,11 @@ export default function FootballAnalysisPage() {
     };
 
     const handleProcessingComplete = (url: string) => {
+        console.log('[Football Analysis] Processing complete callback called with URL:', url);
+        console.log('[Football Analysis] Current user:', user?.email);
+        console.log('[Football Analysis] Current jobId:', jobId);
+        console.log('[Football Analysis] Current userData:', userData);
+        
         setResultUrl(url);
         setAppState('result');
         
@@ -81,7 +86,15 @@ export default function FootballAnalysisPage() {
             if (!fullVideoUrl.startsWith('http')) {
                 // If URL is relative, construct full URL
                 fullVideoUrl = API_ENDPOINTS.FOOTBALL_RESULT(jobId);
+                console.log('[Football Analysis] Constructed full video URL:', fullVideoUrl);
             }
+            
+            console.log('[Football Analysis] Sending email notification:', {
+                userEmail,
+                userName,
+                videoUrl: fullVideoUrl,
+                jobId
+            });
             
             // Send email in background (don't wait for it - non-blocking)
             sendVideoReadyEmail({
@@ -89,9 +102,18 @@ export default function FootballAnalysisPage() {
                 userName: userName,
                 videoUrl: fullVideoUrl,
                 jobId: jobId
+            }).then(() => {
+                console.log('[Football Analysis] ✅ Email notification sent successfully to:', userEmail);
             }).catch((error) => {
-                // Silently handle email errors - don't show to user or block UI
-                console.error('Email notification error:', error);
+                // Log the error but don't show to user or block UI
+                console.error('[Football Analysis] ❌ Email notification error:', error);
+            });
+        } else {
+            console.warn('[Football Analysis] ⚠️ Cannot send email - missing data:', {
+                hasUser: !!user,
+                hasUserData: !!userData,
+                hasJobId: !!jobId,
+                userEmail: user?.email
             });
         }
     };

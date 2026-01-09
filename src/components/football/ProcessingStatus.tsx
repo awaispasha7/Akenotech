@@ -89,13 +89,28 @@ export default function ProcessingStatus({
                 setStatus(data);
                 errorCountRef.current = 0;
 
-                if (data.status === 'done' && data.result_url) {
+                // IMPORTANT FIX: Always call onComplete when status is 'done', even if result_url is missing
+                // Generate the URL ourselves if it's not provided by the backend
+                if (data.status === 'done') {
                     clearInterval(intervalId);
-                    // Ensure result_url is a full URL
-                    let fullResultUrl = data.result_url;
-                    if (fullResultUrl.startsWith('/')) {
-                        fullResultUrl = `${FOOTBALL_API_URL}${fullResultUrl}`;
+                    
+                    // Generate the full video URL - use result_url if available, otherwise construct it
+                    let fullResultUrl: string;
+                    if (data.result_url) {
+                        fullResultUrl = data.result_url;
+                        // If it's a relative URL, make it absolute
+                        if (fullResultUrl.startsWith('/')) {
+                            fullResultUrl = `${FOOTBALL_API_URL}${fullResultUrl}`;
+                        }
+                        console.log(`[Frontend] Using backend result_url: ${fullResultUrl}`);
+                    } else {
+                        // Generate URL ourselves using jobId (fallback if backend doesn't provide it)
+                        console.warn(`[Frontend] result_url is missing for done job ${jobId}, generating URL ourselves`);
+                        fullResultUrl = API_ENDPOINTS.FOOTBALL_RESULT(jobId);
+                        console.log(`[Frontend] Generated result_url: ${fullResultUrl}`);
                     }
+                    
+                    console.log(`[Frontend] Processing complete! Video URL: ${fullResultUrl}`);
                     onComplete(fullResultUrl);
                 } else if (data.status === 'failed') {
                     clearInterval(intervalId);
