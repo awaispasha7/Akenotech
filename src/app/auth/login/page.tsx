@@ -1,19 +1,26 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
 import { signIn, signInWithGoogle, getAuthErrorMessage } from '@/lib/authService';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Get return URL from query params or default to /blog
+  const getReturnUrl = () => {
+    const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect');
+    return returnUrl || '/blog';
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,7 +35,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      router.push('/blog');
+      router.push(getReturnUrl());
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
@@ -42,7 +49,7 @@ export default function LoginPage() {
     
     try {
       await signInWithGoogle();
-      router.push('/blog');
+      router.push(getReturnUrl());
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
@@ -181,3 +188,14 @@ export default function LoginPage() {
   );
 }
 
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  );
+}
